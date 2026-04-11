@@ -1,13 +1,20 @@
 import express from "express";
 import cors from "cors";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
 import Anthropic from "@anthropic-ai/sdk";
 import dotenv from "dotenv";
 
 dotenv.config();
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Serve static files from Vite build
+app.use(express.static(join(__dirname, "dist")));
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -249,6 +256,11 @@ app.post("/api/chat", async (req, res) => {
     res.write("data: [DONE]\n\n");
     res.end();
   }
+});
+
+// SPA fallback - serve index.html for all non-API routes
+app.get("/{*path}", (req, res) => {
+  res.sendFile(join(__dirname, "dist", "index.html"));
 });
 
 const PORT = process.env.PORT || 3001;
