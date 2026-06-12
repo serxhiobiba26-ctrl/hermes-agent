@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ImmoAI Kit — Annunci, post ed email immobiliari in 30 secondi</title>
+  <meta name="description" content="Il kit di prompt AI per agenti immobiliari: genera annunci per i portali, post social ed email pronti da incollare. Provalo gratis." />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="container">
+      <p class="eyebrow">Per agenti e agenzie immobiliari</p>
+      <h1>Annunci, post ed email che vendono casa.<br /><span>Pronti in 30 secondi.</span></h1>
+      <p class="sub">Inserisci 4 dati sull'immobile. Il kit crea il prompt perfetto da incollare in ChatGPT o Claude (gratis) e ti restituisce un testo professionale. Niente da imparare, niente costi nascosti.</p>
+      <a class="cta" href="#tool">Provalo gratis ora ↓</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="tool" class="card">
+      <h2>🏠 Generatore — provalo subito</h2>
+      <div class="grid">
+        <label>Tipo di immobile
+          <input id="tipo" type="text" placeholder="Es. trilocale, villa, attico" />
+        </label>
+        <label>Zona / città
+          <input id="zona" type="text" placeholder="Es. Milano, zona Navigli" />
+        </label>
+        <label>Superficie (mq)
+          <input id="mq" type="text" placeholder="Es. 95" />
+        </label>
+        <label>Prezzo
+          <input id="prezzo" type="text" placeholder="Es. 320.000 €" />
+        </label>
+        <label class="full">Caratteristiche chiave (separate da virgola)
+          <input id="caratteristiche" type="text" placeholder="Es. doppia esposizione, terrazzo, box, ristrutturato 2023" />
+        </label>
+        <label>Cosa vuoi generare
+          <select id="formato">
+            <option value="annuncio">Annuncio per portale (Idealista/Immobiliare.it)</option>
+            <option value="instagram">Post per Instagram/Facebook</option>
+            <option value="email">Email per la lista contatti</option>
+            <option value="whatsapp">Messaggio WhatsApp per un cliente</option>
+          </select>
+        </label>
+        <label>Tono
+          <select id="tono">
+            <option value="professionale ed elegante">Professionale ed elegante</option>
+            <option value="caldo e accogliente">Caldo e accogliente</option>
+            <option value="diretto e concreto">Diretto e concreto</option>
+            <option value="lussuoso ed esclusivo">Lussuoso ed esclusivo</option>
+          </select>
+        </label>
+      </div>
+
+      <button id="genera" class="cta">Genera il prompt →</button>
+
+      <div id="output" class="output hidden">
+        <div class="output-head">
+          <strong>Il tuo prompt è pronto 👇</strong>
+          <button id="copia" class="copy-btn">Copia</button>
+        </div>
+        <pre id="prompt-text"></pre>
+        <p class="hint">Incollalo in <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a> o <a href="https://chat.openai.com" target="_blank" rel="noopener">ChatGPT</a> (versione gratuita) e premi invio. Otterrai il testo finale pronto da pubblicare.</p>
+      </div>
+    </section>
+
+    <section class="card sell">
+      <h2>📦 Il kit completo</h2>
+      <p>Questo è solo un assaggio. Il <strong>ImmoAI Kit completo</strong> contiene:</p>
+      <ul>
+        <li>✅ <strong>150+ prompt professionali</strong> per annunci, social, email, cartelli vetrina, descrizioni virtual tour</li>
+        <li>✅ Generatore web (questo, da usare offline quanto vuoi)</li>
+        <li>✅ <strong>Calendario social</strong> di 30 giorni già scritto per agenti immobiliari</li>
+        <li>✅ Template email per nuovi lead, follow-up e clienti tiepidi</li>
+        <li>✅ Guida "Vendi di più con l'AI senza saper scrivere"</li>
+      </ul>
+      <p class="price"><span>29 €</span> una tantum · nessun abbonamento</p>
+      <a class="cta big" href="#" id="buy">Acquista il kit completo</a>
+      <p class="hint">⚙️ Imposta qui il tuo link Gumroad prima di pubblicare.</p>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>ImmoAI Kit · Strumento per professionisti immobiliari · I testi generati vanno sempre riletti prima della pubblicazione.</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
