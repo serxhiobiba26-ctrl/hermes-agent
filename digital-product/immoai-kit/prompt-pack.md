@@ -3,7 +3,7 @@
 > Come si usa: copia un prompt, sostituisci le parti tra [PARENTESI] con i dati reali,
 > incollalo in ChatGPT o Claude (versione gratuita) e premi invio.
 
-Questo file è un **estratto** di esempio. Il pacchetto completo contiene oltre 150 prompt
+Questo file è un **estratto** di esempio. Il pacchetto completo contiene oltre 100 prompt
 organizzati per categoria. Qui sotto trovi 20 prompt pronti, uno per ogni situazione comune.
 
 ---
@@ -90,5 +90,5 @@ organizzati per categoria. Qui sotto trovi 20 prompt pronti, uno per ogni situaz
 
 ---
 
-*Pacchetto completo (150+ prompt), generatore web, calendario social di 30 giorni e guida:
+*Pacchetto completo (100+ prompt), generatore web, calendario social di 30 giorni e guida:
 disponibile nella versione a pagamento del kit.*

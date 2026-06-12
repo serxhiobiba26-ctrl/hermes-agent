@@ -18,31 +18,36 @@ digital-product/immoai-kit/
 
 Il modello di business è semplice:
 - La **pagina web** (gratis) attira gli agenti immobiliari con il generatore funzionante.
-- Chi vuole tutto (150+ prompt, calendario social, guida) **compra il kit a 29 €** su Gumroad.
+- Chi vuole tutto (100+ prompt, calendario social, guida) **compra il kit a 29 €** su Gumroad.
 
 ---
 
-## Passo 1 — Pubblica la pagina online (gratis)
+## Passo 1 — Pubblica la pagina online (gratis) — 2 minuti, una volta sola
 
-Hai due strade:
+Il repo è già configurato per il deploy automatico (`vercel.json` + `.vercelignore`).
+Ti basta collegarlo una volta:
 
-**A) La faccio io adesso** (consigliata): posso pubblicarla su Vercel e darti subito un link
-   live tipo `immoai-kit.vercel.app`. Dimmi solo "pubblica" e procedo.
+1. Vai su [vercel.com/new](https://vercel.com/new) (account già esistente)
+2. Importa il repository **hermes-agent** dal tuo GitHub
+3. Non cambiare nulla → premi **Deploy**
+4. In ~1 minuto hai il link pubblico (es. `hermes-agent.vercel.app`)
 
-**B) Da solo in 5 minuti:**
-   1. Vai su [app.netlify.com/drop](https://app.netlify.com/drop)
-   2. Trascina la cartella `immoai-kit` nella finestra
-   3. Ottieni subito un link pubblico. Fatto.
+Da quel momento **ogni aggiornamento pushato sul repo va online da solo**.
+
+*Alternativa senza Vercel:* [app.netlify.com/drop](https://app.netlify.com/drop) →
+trascina la cartella `immoai-kit` → link pubblico immediato.
 
 ---
 
-## Passo 2 — Prepara il prodotto da vendere
+## Passo 2 — Il prodotto da vendere (✅ GIÀ PRONTO)
 
-Il prodotto a pagamento è un **PDF + cartella di file**. Devo ancora generartelo completo
-(150 prompt + calendario social + guida). Dimmi "completa il prodotto" e lo preparo io
-in formato pronto da caricare.
+Nella cartella `prodotto-completo/` trovi il prodotto finito:
 
-Per ora, con l'estratto `prompt-pack.md` puoi già testare il mercato.
+- `01-PROMPT-PACK-COMPLETO.md` → 100+ prompt in 12 categorie + 10 mega-prompt bonus
+- `02-CALENDARIO-SOCIAL-30-GIORNI.md` → 30 giorni di post già scritti
+- `03-GUIDA-VENDI-DI-PIU-CON-AI.md` → la guida per il cliente
+
+C'è anche lo ZIP `immoai-kit-prodotto.zip` pronto da caricare su Gumroad così com'è.
 
 ---
 
@@ -95,9 +100,17 @@ Regola d'oro: **prima regali lo strumento gratuito, poi proponi il kit completo.
 
 ---
 
-## Cosa posso fare io adesso (dimmi quale)
+## Stato attuale
 
-- **"pubblica"** → metto la pagina online su Vercel e ti do il link live.
-- **"completa il prodotto"** → genero i 150+ prompt, il calendario social e la guida PDF-ready.
+- ✅ Generatore web + pagina di vendita → `index.html` (pronta per il deploy)
+- ✅ Prodotto completo → cartella `prodotto-completo/` + ZIP per Gumroad
+- ✅ Post di lancio → `POST-DI-LANCIO.md` (gruppi FB, LinkedIn, DM, email, piano 7 giorni)
+- ⬜ TU: importa il repo su [vercel.com/new](https://vercel.com/new) → link live
+- ⬜ TU: crea il prodotto su [gumroad.com](https://gumroad.com) e carica lo ZIP
+- ⬜ IO: quando mi dai il link Gumroad, lo collego al bottone "Acquista" della pagina
+
+## Cosa posso fare dopo (dimmi quale)
+
 - **"cambia nicchia: ___"** → riadatto tutto a un altro settore in pochi minuti.
-- **"scrivi i post di lancio"** → ti preparo i testi pronti per Facebook/Instagram/LinkedIn.
+- **"versione inglese"** → traduco tutto per vendere sul mercato internazionale (più grande).
+- **"secondo prodotto"** → replico il modello per un'altra nicchia (avvocati, ristoranti...).
