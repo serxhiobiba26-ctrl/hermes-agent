@@ -25,6 +25,30 @@
   const qInput = $("#q-input");
   const solveResult = $("#solve-result");
 
+  // Capisce anche la scrittura "naturale": più, meno, per, diviso, x², radice di…
+  function naturalize(raw) {
+    let s = " " + String(raw).toLowerCase() + " ";
+    const sup = { "⁰": "0", "¹": "1", "²": "2", "³": "3", "⁴": "4", "⁵": "5", "⁶": "6", "⁷": "7", "⁸": "8", "⁹": "9" };
+    s = s.replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, (c) => "^" + sup[c]);
+    s = s
+      .replace(/\b(quanto\s+fa|quanto\s+vale|calcola|risolvi(?:mi)?|risolvere|trova(?:mi)?|determina|il\s+valore\s+di|la\s+soluzione\s+di|equazione)\b/g, " ")
+      .replace(/radice(?:\s+quadrata)?(?:\s+di)?\s*([0-9.]+)/g, "sqrt($1)")
+      .replace(/\bal\s+quadrato\b/g, "^2")
+      .replace(/\bal\s+cubo\b/g, "^3")
+      .replace(/\belevato(?:\s+alla|\s+a)?\b/g, "^")
+      // "più" ha l'accento: \b non funziona, uso delimitatori espliciti (non-lettere)
+      .replace(/(^|[^a-zà-ÿ])pi(?:ù|u)(?=[^a-zà-ÿ]|$)/gi, "$1+")
+      .replace(/\bmeno\b/g, "-")
+      .replace(/\b(?:diviso(?:\s+per)?|fratto)\b/g, "/")
+      .replace(/\b(?:moltiplicato\s+per|per|volte)\b/g, "*")
+      .replace(/\buguale(?:\s+a)?\b/g, "=")
+      .replace(/(\d+(?:\.\d+)?)\s*%/g, "($1/100)")
+      .replace(/\b(?:il|lo|la|gli|le|uno|una|un)\b/g, " ")
+      .replace(/\bdi\b/g, "*")
+      .replace(/[?!]/g, " ");
+    return s;
+  }
+
   // Normalizza l'input per il motore di calcolo
   function normalizeMath(raw) {
     let s = String(raw).trim()
@@ -73,7 +97,8 @@
       return;
     }
     let op = $("#q-op").value;
-    const s = normalizeMath(raw);
+    const s = normalizeMath(naturalize(raw));
+    if (!s) { showSolve("✏️ Scrivi un'operazione, ad esempio <code>x^2 - 5x + 6 = 0</code> oppure <code>radice di 144</code>.", "warn"); return; }
     const v = guessVar(s);
     if (op === "auto") op = s.includes("=") ? "solve" : "simplify";
 
