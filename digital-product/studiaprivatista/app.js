@@ -182,6 +182,91 @@
   });
 
   /* =========================================================
+     1b) FOTO dell'esercizio — OCR sul sito + "risolvi con l'AI"
+     ========================================================= */
+  const photoInput = $("#photo-input");
+  let photoURL = null;
+
+  function loadScript(src) {
+    return new Promise((res, rej) => {
+      const sc = document.createElement("script");
+      sc.src = src;
+      sc.onload = res;
+      sc.onerror = () => rej(new Error("script"));
+      document.head.appendChild(sc);
+    });
+  }
+  let tessPromise = null;
+  function loadTesseract() {
+    if (typeof Tesseract !== "undefined") return Promise.resolve();
+    if (!tessPromise) tessPromise = loadScript("https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js");
+    return tessPromise;
+  }
+
+  if (photoInput) {
+    $("#photo-pick").addEventListener("click", () => photoInput.click());
+
+    photoInput.addEventListener("change", () => {
+      const f = photoInput.files && photoInput.files[0];
+      if (!f) return;
+      if (photoURL) URL.revokeObjectURL(photoURL);
+      photoURL = URL.createObjectURL(f);
+      $("#photo-img").src = photoURL;
+      $("#photo-preview").classList.remove("hidden");
+      $("#photo-status").textContent = "";
+      $("#photo-ai-box").classList.add("hidden");
+    });
+
+    $("#photo-clear").addEventListener("click", () => {
+      if (photoURL) { URL.revokeObjectURL(photoURL); photoURL = null; }
+      photoInput.value = "";
+      $("#photo-preview").classList.add("hidden");
+      $("#photo-status").textContent = "";
+    });
+
+    // Risolvi con l'AI: prepara l'istruzione pronta da incollare (la foto la allega l'utente)
+    $("#photo-ai").addEventListener("click", () => {
+      $("#photo-ai-text").textContent =
+        "Ho fotografato un esercizio (immagine allegata). Per favore:\n" +
+        "1) trascrivi l'esercizio che vedi nella foto;\n" +
+        "2) risolvilo spiegando OGNI passaggio in modo semplice e chiaro;\n" +
+        "3) scrivi la risposta finale evidenziata.\n" +
+        "Sono uno studente che prepara il diploma di maturità da privatista.";
+      $("#photo-ai-box").classList.remove("hidden");
+      $("#photo-ai-box").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+
+    // OCR sperimentale: legge il testo dalla foto e lo mette nel riquadro
+    $("#photo-ocr").addEventListener("click", async () => {
+      const f = photoInput.files && photoInput.files[0];
+      if (!f) return;
+      const status = $("#photo-status");
+      const btn = $("#photo-ocr");
+      btn.disabled = true;
+      status.textContent = "⏳ Carico il lettore di testo (solo la prima volta)…";
+      try {
+        await loadTesseract();
+        status.textContent = "🔎 Sto leggendo la foto… può metterci qualche secondo.";
+        const worker = await Tesseract.createWorker("ita+eng");
+        const { data } = await worker.recognize(f);
+        await worker.terminate();
+        const text = (data && data.text ? data.text : "").replace(/\s*\n\s*/g, " ").trim();
+        if (!text) {
+          status.textContent = "Non sono riuscito a leggere testo dalla foto. Prova con una foto più nitida, oppure usa “Risolvi con l'AI”.";
+        } else {
+          qInput.value = text;
+          status.textContent = "✓ Testo letto e inserito qui sopra. Controllalo e premi Risolvi.";
+          qInput.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+      } catch (e) {
+        status.textContent = "Lettura non riuscita (serve la connessione per scaricare il lettore). Usa “Risolvi con l'AI”.";
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  }
+
+  /* =========================================================
      2) MEMORIZZA — flashcard con ripetizione dilazionata (SM-2 lite)
      ========================================================= */
   const DAY = 86400000;
@@ -372,6 +457,114 @@
       .replace(/[̀-ͯ]/g, "")
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "");
+  }
+
+  /* =========================================================
+     4) ZAINO — i tuoi file salvati nel browser (IndexedDB)
+     ========================================================= */
+  const bagAdd = $("#bag-add");
+  if (bagAdd && "indexedDB" in window) {
+    const DB_NAME = "sp_zaino", STORE = "files";
+
+    function openDB() {
+      return new Promise((res, rej) => {
+        const r = indexedDB.open(DB_NAME, 1);
+        r.onupgradeneeded = () => { r.result.createObjectStore(STORE, { keyPath: "id" }); };
+        r.onsuccess = () => res(r.result);
+        r.onerror = () => rej(r.error);
+      });
+    }
+    async function bagAll() {
+      const d = await openDB();
+      return new Promise((res, rej) => {
+        const req = d.transaction(STORE, "readonly").objectStore(STORE).getAll();
+        req.onsuccess = () => res(req.result || []);
+        req.onerror = () => rej(req.error);
+      });
+    }
+    async function bagPut(item) {
+      const d = await openDB();
+      return new Promise((res, rej) => {
+        const t = d.transaction(STORE, "readwrite");
+        t.objectStore(STORE).put(item);
+        t.oncomplete = () => res();
+        t.onerror = () => rej(t.error);
+      });
+    }
+    async function bagDel(id) {
+      const d = await openDB();
+      return new Promise((res, rej) => {
+        const t = d.transaction(STORE, "readwrite");
+        t.objectStore(STORE).delete(id);
+        t.oncomplete = () => res();
+        t.onerror = () => rej(t.error);
+      });
+    }
+
+    function fmtSize(n) {
+      if (n < 1024) return n + " B";
+      if (n < 1048576) return (n / 1024).toFixed(0) + " KB";
+      return (n / 1048576).toFixed(1) + " MB";
+    }
+    function iconFor(type) {
+      if (/image/.test(type)) return "🖼️";
+      if (/pdf/.test(type)) return "📕";
+      if (/word|document|text/.test(type)) return "📄";
+      return "📎";
+    }
+
+    async function renderBag() {
+      const list = $("#bag-list"), info = $("#bag-info");
+      let items;
+      try { items = await bagAll(); }
+      catch { info.textContent = "Archiviazione non disponibile in questo browser."; return; }
+      items.sort((a, b) => b.date - a.date);
+      if (!items.length) {
+        list.innerHTML = '<p class="no-results">Ancora nessun file. Aggiungi foto, PDF o appunti: resteranno qui, sul tuo dispositivo.</p>';
+        info.textContent = "";
+        return;
+      }
+      const total = items.reduce((s, i) => s + (i.size || 0), 0);
+      info.textContent = items.length + " file · " + fmtSize(total);
+      list.innerHTML = "";
+      items.forEach((it) => {
+        const el = document.createElement("div");
+        el.className = "bag-item";
+        el.innerHTML =
+          '<span class="bag-ic">' + iconFor(it.type) + "</span>" +
+          '<div class="bag-meta"><span class="bag-name">' + escapeHtml(it.name) + "</span>" +
+          '<span class="muted small">' + fmtSize(it.size) + " · " + new Date(it.date).toLocaleDateString("it-IT") + "</span></div>" +
+          '<button class="link-btn bag-open" type="button">Apri</button>' +
+          '<button class="link-btn bag-del" type="button">Elimina</button>';
+        el.querySelector(".bag-open").addEventListener("click", () => {
+          const url = URL.createObjectURL(it.blob);
+          window.open(url, "_blank");
+          setTimeout(() => URL.revokeObjectURL(url), 60000);
+        });
+        el.querySelector(".bag-del").addEventListener("click", async () => {
+          await bagDel(it.id);
+          renderBag();
+        });
+        list.appendChild(el);
+      });
+    }
+
+    const bagInput = $("#bag-input");
+    bagAdd.addEventListener("click", () => bagInput.click());
+    bagInput.addEventListener("change", async () => {
+      const files = Array.from(bagInput.files || []);
+      for (const f of files) {
+        if (f.size > 25 * 1048576) { $("#bag-info").textContent = '"' + f.name + '" è troppo grande (max 25 MB).'; continue; }
+        await bagPut({
+          id: Date.now() + "-" + Math.random().toString(36).slice(2, 7),
+          name: f.name, type: f.type, size: f.size, date: Date.now(), blob: f,
+        });
+      }
+      bagInput.value = "";
+      renderBag();
+    });
+
+    renderBag();
   }
 
   /* ---- init ---- */

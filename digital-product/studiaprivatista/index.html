@@ -43,6 +43,7 @@
         <button class="tab active" data-tab="risolvi" role="tab">🔍 Risolvi</button>
         <button class="tab" data-tab="memorizza" role="tab">🧠 Memorizza</button>
         <button class="tab" data-tab="formulario" role="tab">📐 Formulario</button>
+        <button class="tab" data-tab="zaino" role="tab">🎒 Zaino</button>
       </div>
 
       <!-- TAB 1: RISOLVI -->
@@ -69,6 +70,38 @@
         </div>
 
         <div id="solve-result" class="solve-result hidden"></div>
+
+        <!-- FOTO dell'esercizio -->
+        <div class="photo-box">
+          <input id="photo-input" type="file" accept="image/*" hidden />
+          <button id="photo-pick" class="cta ghost small" type="button">📷 Fotografa o carica l'esercizio</button>
+          <div id="photo-preview" class="photo-preview hidden">
+            <img id="photo-img" alt="anteprima dell'esercizio" />
+            <div class="photo-actions">
+              <button id="photo-ocr" class="cta small" type="button">🔎 Leggi il testo dalla foto</button>
+              <button id="photo-ai" class="cta small ghost" type="button">🤖 Risolvi la foto con l'AI</button>
+              <button id="photo-clear" class="link-btn" type="button">Rimuovi</button>
+            </div>
+            <p id="photo-status" class="muted small"></p>
+            <div id="photo-ai-box" class="output hidden">
+              <div class="output-head">
+                <span>🤖 Risolvi la foto con l'AI (gratis)</span>
+                <button class="copy-btn" data-target="photo-ai-text">Copia istruzione</button>
+              </div>
+              <ol class="ai-steps">
+                <li>Apri ChatGPT o Claude qui sotto.</li>
+                <li><strong>Allega la foto</strong> (icona graffetta o immagine).</li>
+                <li>Incolla questa istruzione e invia.</li>
+              </ol>
+              <pre id="photo-ai-text"></pre>
+              <div class="output-actions">
+                <a class="link-btn" href="https://chat.openai.com/" target="_blank" rel="noopener">Apri ChatGPT ↗</a>
+                <a class="link-btn" href="https://claude.ai/" target="_blank" rel="noopener">Apri Claude ↗</a>
+              </div>
+            </div>
+          </div>
+          <p class="hint">📷 La lettura sul sito funziona meglio con <strong>testo stampato</strong> e ben illuminato. Per la scrittura a mano o le formule complesse, usa <strong>“Risolvi con l'AI”</strong>.</p>
+        </div>
 
         <p class="hint">Puoi usare i simboli (<code>^</code> potenze, <code>*</code> per, <code>/</code> diviso, <code>=</code> equazioni) <strong>oppure le parole</strong> (più, meno, per, diviso, «al quadrato», «radice di»). La <code>x</code> è la variabile. Premi Invio per risolvere.</p>
 
@@ -166,6 +199,18 @@
         <p class="panel-intro">Tutte le formule e regole che servono, sempre a portata di mano. Cerca per parola chiave.</p>
         <input id="formula-search" class="search" type="search" placeholder="🔎 Cerca una formula… (es. area, velocità, present perfect)" />
         <div id="formula-list" class="formula-list"></div>
+      </div>
+
+      <!-- TAB 4: ZAINO -->
+      <div class="panel" id="panel-zaino">
+        <p class="panel-intro">Il tuo <strong>zaino digitale</strong>: carica foto, PDF e appunti e ritrovali quando vuoi. Restano salvati <strong>solo sul tuo dispositivo</strong> (nessun server, nessun account).</p>
+        <input id="bag-input" type="file" multiple hidden />
+        <div class="op-row">
+          <button id="bag-add" class="cta" type="button">➕ Aggiungi file</button>
+          <span id="bag-info" class="muted small"></span>
+        </div>
+        <div id="bag-list" class="bag-list"></div>
+        <p class="hint">💡 I file restano nel browser di questo dispositivo. Se cancelli i dati del browser o cambi dispositivo, non li ritrovi. Max 25 MB a file.</p>
       </div>
     </section>
 
