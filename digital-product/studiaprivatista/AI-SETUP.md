@@ -33,10 +33,8 @@ Tempo: ~10 minuti, una volta sola.
 5. Premi **Deploy**. Dopo ~1 minuto hai il sito online (es. `studiaprivatista.vercel.app`).
 
 ### Branch di produzione
-Il sito sta sul ramo **`claude/studiaprivatista-website-mlm0sa`**.
-Se Vercel pubblica un altro ramo, vai in **Settings → Git → Production Branch**,
-imposta `claude/studiaprivatista-website-mlm0sa` e premi **Redeploy**.
-*(Oppure chiedimi di unire tutto nel ramo principale e salti questo passaggio.)*
+✅ **Niente da fare:** il codice è già unito nel ramo principale **`main`**, che è
+quello che Vercel pubblica di default. Importi e premi Deploy, basta così.
 
 ---
 
