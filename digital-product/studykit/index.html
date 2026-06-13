@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StudyKit — Studia meglio e in metà tempo con l'AI</title>
+  <meta name="description" content="Il kit di comandi AI per studenti: trasforma i tuoi appunti in riassunti, flashcard, quiz e interrogazioni. Provalo gratis con ChatGPT o Claude." />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="container">
+      <p class="eyebrow">Per studenti delle superiori (e non solo)</p>
+      <h1>Studia meglio, in metà tempo.<br /><span>Partendo dai TUOI appunti.</span></h1>
+      <p class="sub">Scegli la materia e cosa ti serve. Il kit crea il comando perfetto da incollare in ChatGPT o Claude (gratis): riassunti, flashcard, quiz e interrogazioni basati sul tuo materiale. Niente studio a caso.</p>
+      <a class="cta" href="#tool">Provalo gratis ora ↓</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="tool" class="card">
+      <h2>📚 Generatore — provalo subito</h2>
+      <div class="grid">
+        <label>Materia
+          <input id="materia" type="text" placeholder="Es. storia, matematica, inglese" />
+        </label>
+        <label>Argomento
+          <input id="argomento" type="text" placeholder="Es. la Rivoluzione francese" />
+        </label>
+        <label>Livello
+          <select id="livello">
+            <option value="scuola superiore">Scuola superiore</option>
+            <option value="scuola media">Scuola media</option>
+            <option value="università">Università</option>
+            <option value="concorso o certificazione">Concorso / certificazione</option>
+          </select>
+        </label>
+        <label>Cosa ti serve
+          <select id="formato">
+            <option value="riassunto">Riassunto chiaro e ordinato</option>
+            <option value="flashcard">Flashcard per memorizzare</option>
+            <option value="quiz">Quiz a risposta multipla</option>
+            <option value="interrogazione">Interrogazione (l'AI ti interroga)</option>
+            <option value="mappa">Mappa concettuale</option>
+            <option value="spiegazione">Spiegazione semplice</option>
+            <option value="esercizio">Aiuto su un esercizio (passo passo)</option>
+          </select>
+        </label>
+      </div>
+
+      <button id="genera" class="cta">Genera il comando →</button>
+
+      <div id="output" class="output hidden">
+        <div class="output-head">
+          <strong>Il tuo comando è pronto 👇</strong>
+          <button id="copia" class="copy-btn">Copia</button>
+        </div>
+        <pre id="prompt-text"></pre>
+        <p class="hint">💡 <strong>Importante:</strong> prima carica nella chat la <strong>foto dei tuoi appunti o del libro</strong>, poi incolla questo comando. Funziona su <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a> o <a href="https://chat.openai.com" target="_blank" rel="noopener">ChatGPT</a> (versione gratuita).</p>
+      </div>
+    </section>
+
+    <section class="card sell">
+      <h2>📦 Il kit completo</h2>
+      <p>Questo è solo un assaggio. Lo <strong>StudyKit completo</strong> contiene:</p>
+      <ul>
+        <li>✅ <strong>50+ comandi pronti</strong> divisi in 4 fasi: Capire, Memorizzare, Verificare, Casi speciali</li>
+        <li>✅ <strong>Pacchetti per materia</strong>: matematica, storia, italiano, inglese, scienze</li>
+        <li>✅ Il <strong>piano "5 giorni prima della verifica"</strong> giorno per giorno</li>
+        <li>✅ Generatore web (questo, da usare offline quanto vuoi)</li>
+        <li>✅ Guida "Studia la metà del tempo con l'AI"</li>
+      </ul>
+      <p class="price"><span>12 €</span> una tantum · nessun abbonamento</p>
+      <a class="cta big" href="#" id="buy">Acquista il kit completo</a>
+      <p class="hint">⚙️ Imposta qui il tuo link Gumroad prima di pubblicare.</p>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>StudyKit · Strumento di supporto allo studio · L'AI aiuta a capire e ripassare, ma i dati (date, formule, nomi) vanno sempre verificati sul libro.</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
