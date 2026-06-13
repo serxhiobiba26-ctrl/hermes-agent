@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Studia da Privatista — Prendi il diploma con il metodo giusto (gratis)</title>
+  <meta name="description" content="La suite di studio gratuita per chi prende il diploma di maturità da privatista: risolvi gli esercizi, memorizza con le flashcard a ripetizione dilazionata e consulta il formulario. Più la guida completa all'esame." />
+  <meta name="theme-color" content="#0e1424" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Studia da Privatista — il metodo giusto per il diploma" />
+  <meta property="og:description" content="Suite di studio gratuita: risolvi, memorizza con le flashcard e consulta il formulario. Più la guida completa all'esame da privatista." />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="it_IT" />
+
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%93%3C/text%3E%3C/svg%3E" />
+</head>
+<body>
+  <header class="hero">
+    <div class="container">
+      <p class="eyebrow">Per chi prende il diploma di maturità da privatista</p>
+      <h1>Studia da privatista.<br /><span>Col metodo giusto, gratis.</span></h1>
+      <p class="sub">Niente scuole online da migliaia di euro. Qui hai una <strong>suite di studio gratuita</strong>: risolvi gli esercizi con l'AI, memorizzi con le flashcard a ripetizione dilazionata e tieni a portata di mano tutte le formule. Tutto nel browser, senza account.</p>
+      <div class="hero-cta">
+        <a class="cta" href="#suite">Apri la suite gratis ↓</a>
+        <a class="cta ghost" href="#kit">Vedi il Kit completo</a>
+      </div>
+      <p class="trust">100% offline · Nessun login · Nessun costo nascosto</p>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- ===== STUDY SUITE ===== -->
+    <section id="suite" class="card suite">
+      <div class="suite-head">
+        <h2>🎓 La tua suite di studio</h2>
+        <p class="muted">Tre strumenti in uno. Scegli da dove partire.</p>
+      </div>
+
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-tab="risolvi" role="tab">🔍 Risolvi</button>
+        <button class="tab" data-tab="memorizza" role="tab">🧠 Memorizza</button>
+        <button class="tab" data-tab="formulario" role="tab">📐 Formulario</button>
+      </div>
+
+      <!-- TAB 1: RISOLVI -->
+      <div class="panel active" id="panel-risolvi">
+        <p class="panel-intro">Scrivi un calcolo per la risposta immediata, oppure un esercizio/domanda per generare il <strong>prompt perfetto</strong> da incollare in ChatGPT o Claude (gratis).</p>
+
+        <label class="block">La tua domanda, esercizio o calcolo
+          <textarea id="q-input" rows="3" placeholder="Es. (12 + 5) * 3 — oppure — Spiegami il teorema di Pitagora con un esempio"></textarea>
+        </label>
+
+        <div id="calc-result" class="calc-result hidden"></div>
+
+        <div class="grid">
+          <label>Materia
+            <select id="q-materia">
+              <option value="Matematica">Matematica</option>
+              <option value="Fisica">Fisica</option>
+              <option value="Italiano">Italiano</option>
+              <option value="Storia">Storia</option>
+              <option value="Filosofia">Filosofia</option>
+              <option value="Scienze">Scienze</option>
+              <option value="Inglese">Inglese</option>
+              <option value="Diritto / Economia">Diritto / Economia</option>
+              <option value="Altra materia">Altra materia</option>
+            </select>
+          </label>
+          <label>Cosa vuoi
+            <select id="q-modo">
+              <option value="risolvi">Risolvi passo-passo</option>
+              <option value="spiega">Spiega in modo semplice</option>
+              <option value="verifica">Verifica la mia soluzione</option>
+              <option value="esercizi">Crea esercizi simili</option>
+              <option value="riassunto">Riassumi l'argomento</option>
+              <option value="interroga">Interrogami su questo argomento</option>
+            </select>
+          </label>
+        </div>
+
+        <button id="gen-prompt" class="cta">Genera il prompt →</button>
+
+        <div id="prompt-out" class="output hidden">
+          <div class="output-head">
+            <span>📋 Prompt pronto — incollalo in ChatGPT/Claude</span>
+            <button class="copy-btn" data-target="prompt-text">Copia</button>
+          </div>
+          <pre id="prompt-text"></pre>
+          <div class="output-actions">
+            <a id="open-chatgpt" class="link-btn" href="https://chat.openai.com/" target="_blank" rel="noopener">Apri ChatGPT ↗</a>
+            <a id="open-claude" class="link-btn" href="https://claude.ai/" target="_blank" rel="noopener">Apri Claude ↗</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: MEMORIZZA -->
+      <div class="panel" id="panel-memorizza">
+        <p class="panel-intro">Flashcard con <strong>ripetizione dilazionata</strong>: rivedi le carte giuste al momento giusto. Tutto salvato nel tuo browser.</p>
+
+        <div id="deck-list" class="deck-list"></div>
+
+        <div id="study-area" class="study-area hidden">
+          <div class="study-top">
+            <button id="exit-study" class="link-btn">← Tutti i mazzi</button>
+            <span id="study-progress" class="muted"></span>
+          </div>
+          <div id="flashcard" class="flashcard">
+            <div class="fc-side" id="fc-front"></div>
+            <div class="fc-side fc-back hidden" id="fc-back"></div>
+          </div>
+          <button id="reveal-btn" class="cta wide">Mostra risposta</button>
+          <div id="rate-row" class="rate-row hidden">
+            <button class="rate" data-q="0">Di nuovo</button>
+            <button class="rate" data-q="3">Difficile</button>
+            <button class="rate" data-q="4">Bene</button>
+            <button class="rate" data-q="5">Facile</button>
+          </div>
+          <div id="study-done" class="study-done hidden">
+            <p>✅ Hai finito il ripasso di oggi per questo mazzo!</p>
+            <button id="done-back" class="cta">Torna ai mazzi</button>
+          </div>
+        </div>
+
+        <details class="add-cards">
+          <summary>➕ Crea il tuo mazzo</summary>
+          <div class="grid">
+            <label class="full">Nome del mazzo
+              <input id="new-deck-name" type="text" placeholder="Es. Date di Storia" />
+            </label>
+            <label>Fronte (domanda)
+              <input id="new-card-front" type="text" placeholder="Es. Anno della Rivoluzione francese" />
+            </label>
+            <label>Retro (risposta)
+              <input id="new-card-back" type="text" placeholder="Es. 1789" />
+            </label>
+          </div>
+          <button id="add-card-btn" class="cta small">Aggiungi carta</button>
+          <p id="add-card-msg" class="muted small"></p>
+        </details>
+      </div>
+
+      <!-- TAB 3: FORMULARIO -->
+      <div class="panel" id="panel-formulario">
+        <p class="panel-intro">Tutte le formule e regole che servono, sempre a portata di mano. Cerca per parola chiave.</p>
+        <input id="formula-search" class="search" type="search" placeholder="🔎 Cerca una formula… (es. area, velocità, present perfect)" />
+        <div id="formula-list" class="formula-list"></div>
+      </div>
+    </section>
+
+    <!-- ===== COME FUNZIONA L'ESAME ===== -->
+    <section id="esame" class="card">
+      <h2>📋 Come funziona il diploma da privatista</h2>
+      <p class="muted lead">Il diploma di maturità da privatista è un diploma <strong>identico</strong> a quello delle scuole tradizionali: si ottiene superando l'<strong>Esame di Stato</strong> come <em>candidato esterno</em>. Ecco i punti chiave.</p>
+      <div class="steps">
+        <div class="step"><span class="num">1</span><div><h3>Domanda di ammissione</h3><p>Presenti la domanda come candidato esterno all'Ufficio Scolastico Regionale, di norma entro il <strong>30 novembre</strong> dell'anno precedente l'esame. Verifica sempre le scadenze aggiornate sul sito del MIM/USR.</p></div></div>
+        <div class="step"><span class="num">2</span><div><h3>Sede e requisiti</h3><p>Ti viene assegnata una scuola dove sostenere l'esame. Servono i requisiti di età/percorso previsti dalla normativa (in genere aver compiuto gli anni del tuo corso).</p></div></div>
+        <div class="step"><span class="num">3</span><div><h3>Eventuali esami preliminari</h3><p>Se non hai i titoli degli anni precedenti, potresti dover sostenere gli <strong>esami preliminari</strong> davanti al consiglio di classe prima dell'Esame di Stato.</p></div></div>
+        <div class="step"><span class="num">4</span><div><h3>Esame di Stato</h3><p>Due prove scritte + colloquio orale, come per tutti. Superandolo ottieni lo stesso diploma valido per università e concorsi.</p></div></div>
+      </div>
+      <p class="disclaimer">⚠️ Le regole e le scadenze possono cambiare ogni anno. Verifica sempre le informazioni ufficiali sul sito del <strong>Ministero dell'Istruzione e del Merito</strong> e del tuo <strong>Ufficio Scolastico Regionale</strong> prima di iscriverti.</p>
+    </section>
+
+    <!-- ===== PERCHÉ ===== -->
+    <section class="card why">
+      <h2>Perché studiare da privatista (col metodo giusto)</h2>
+      <div class="why-grid">
+        <div class="why-item"><span>💸</span><h3>Risparmi migliaia di euro</h3><p>Le scuole online private chiedono spesso 2.000–6.000 € all'anno. Da privatista paghi solo le tasse d'esame.</p></div>
+        <div class="why-item"><span>⏱️</span><h3>Vai al tuo ritmo</h3><p>Studi quando vuoi e puoi recuperare più anni in una sola sessione, se sei pronto.</p></div>
+        <div class="why-item"><span>🧠</span><h3>Metodo, non solo forza di volontà</h3><p>Ripetizione dilazionata + AI come tutor: memorizzi di più studiando di meno, e con costanza.</p></div>
+        <div class="why-item"><span>🎯</span><h3>Stesso diploma, stesso valore</h3><p>Il titolo è identico a quello di una scuola statale: vale per università, concorsi e lavoro.</p></div>
+      </div>
+    </section>
+
+    <!-- ===== KIT (UPSELL) ===== -->
+    <section id="kit" class="card kit">
+      <p class="eyebrow center">Quando vuoi fare sul serio</p>
+      <h2 class="center">📦 Kit Privatista — tutto pronto per l'esame</h2>
+      <p class="muted center lead">La suite gratuita ti fa partire. Il <strong>Kit Privatista</strong> ti porta fino al diploma: piano di studio completo, 100+ prompt, mazzi di flashcard già pronti e la guida passo-passo all'iscrizione.</p>
+      <div class="kit-grid">
+        <ul class="kit-list">
+          <li>📅 <strong>Piano di studio 6 mesi</strong> — settimana per settimana, per ogni indirizzo</li>
+          <li>💬 <strong>100+ prompt</strong> per studiare, ripassare e simulare l'esame con l'AI</li>
+          <li>🧠 <strong>Mazzi di flashcard</strong> pronti da importare (storia, inglese, scienze, civica…)</li>
+          <li>📐 <strong>Formulario esteso</strong> in PDF, stampabile</li>
+          <li>📝 <strong>Guida all'iscrizione</strong> — domanda, documenti, scadenze, esami preliminari</li>
+          <li>🎤 <strong>Simulazioni del colloquio orale</strong> con domande e risposte</li>
+        </ul>
+        <div class="kit-buy">
+          <div class="price"><span class="old">49 €</span><span class="now">29 €</span></div>
+          <p class="muted small">Prezzo di lancio per i primi iscritti.</p>
+          <a class="cta big" id="buy-link" href="#" target="_blank" rel="noopener">Ottieni il Kit →</a>
+          <p class="muted small">Pagamento sicuro su Gumroad · Download immediato</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== FAQ ===== -->
+    <section id="faq" class="card">
+      <h2>Domande frequenti</h2>
+      <details class="faq"><summary>Il diploma da privatista vale come gli altri?</summary><p>Sì. Si ottiene superando lo stesso Esame di Stato e ha pieno valore legale per università, concorsi e lavoro.</p></details>
+      <details class="faq"><summary>Quanto costa fare l'esame da privatista?</summary><p>Si pagano le tasse d'esame e l'eventuale contributo: poche decine/centinaia di euro, contro le migliaia delle scuole online. Verifica gli importi aggiornati sui canali ufficiali.</p></details>
+      <details class="faq"><summary>Posso recuperare più anni insieme?</summary><p>In molti casi sì, se hai i requisiti previsti dalla normativa. Gli esami preliminari servono proprio a certificare la preparazione degli anni mancanti.</p></details>
+      <details class="faq"><summary>La suite gratuita ha dei limiti?</summary><p>No: risolvi, flashcard e formulario sono completamente gratuiti e funzionano offline. Per i contenuti già pronti (piani, prompt, mazzi, guida) c'è il Kit a pagamento.</p></details>
+      <details class="faq"><summary>I miei dati delle flashcard dove finiscono?</summary><p>Restano solo nel tuo browser (localStorage). Non c'è nessun server e nessun account: se cambi dispositivo non li ritrovi.</p></details>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p><strong>Studia da Privatista</strong> — la suite di studio gratuita per il diploma di maturità.</p>
+      <p class="muted small">Strumento di supporto allo studio. Le informazioni sull'esame sono indicative: verifica sempre sui canali ufficiali del Ministero dell'Istruzione e del Merito e dell'Ufficio Scolastico Regionale.</p>
+    </div>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
