@@ -35,17 +35,17 @@ module.exports = async (req, res) => {
     const mimeType = m ? m[1] : "image/jpeg";
     const data = m ? m[2] : image;
 
-    // Un solo modello, ma istruito a comportarsi come una piccola squadra:
-    // LETTORE (trascrive) → RISOLUTORE (spiega) → CONTROLLORE (verifica).
+    // Risposta BREVE e con i NUMERI, non un tema discorsivo.
     const prompt =
-      "Sei un tutor che aiuta uno studente a prendere il diploma di maturità da privatista. " +
-      "Nell'immagine c'è un esercizio o una domanda (può essere stampato o scritto a mano). " +
-      "Lavora in tre fasi, come una piccola squadra di assistenti:\n" +
-      "1) LETTORE: trascrivi fedelmente ciò che vedi nell'immagine.\n" +
-      "2) RISOLUTORE: risolvi spiegando OGNI passaggio in modo semplice e chiaro, in italiano.\n" +
-      "3) CONTROLLORE: ricontrolla i calcoli e correggi eventuali errori.\n" +
-      "Alla fine scrivi una riga che inizia con \"✅ Risposta:\" con il risultato finale.\n" +
-      "Se l'immagine non è leggibile, dillo chiaramente e spiega cosa rifotografare.\n" +
+      "Sei un tutor di matematica per il diploma da privatista. " +
+      "Nell'immagine c'è un esercizio (anche scritto a mano). " +
+      "Rispondi in modo BREVE e con i NUMERI, NON con un tema discorsivo. " +
+      "Prima leggi bene, poi ricontrolla i conti. Usa ESATTAMENTE questo formato, in italiano:\n" +
+      "📝 Esercizio: (trascrivi l'esercizio com'è, con numeri e simboli)\n" +
+      "🧮 Svolgimento: (i passaggi essenziali, uno per riga, con numeri/equazioni — niente frasi lunghe)\n" +
+      "✅ Risposta: (solo il risultato finale, in numeri)\n" +
+      "Vai dritto ai calcoli. Se ci sono più soluzioni, elencale tutte (es. x = 2; x = 3). " +
+      "Se l'immagine non è leggibile, scrivi solo: \"Foto non leggibile: rifalla più nitida e dritta.\"\n" +
       (question ? "Nota dello studente: " + question + "\n" : "");
 
     const url =
@@ -57,7 +57,7 @@ module.exports = async (req, res) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: mimeType, data: data } }] }],
-        generationConfig: { temperature: 0.2, maxOutputTokens: 1200 },
+        generationConfig: { temperature: 0.1, maxOutputTokens: 800 },
       }),
     });
 
