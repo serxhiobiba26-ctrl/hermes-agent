@@ -57,6 +57,21 @@
     return nerdamerReady;
   }
 
+  // Funzione AI (Gemini, via serverless) — risolve foto o testo libero
+  const AI_ENDPOINT = "/api/solve-photo";
+  function nl2br(t) { return escapeHtml(t).replace(/\n/g, "<br>"); }
+  async function solveWithAI(payload) {
+    const resp = await fetch(AI_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (resp.status === 404 || resp.status === 405) throw new Error("nofunc");
+    const j = await resp.json().catch(() => ({}));
+    if (!resp.ok) throw new Error(j.error || "Errore dall'AI");
+    return j.text || "";
+  }
+
   // Capisce anche la scrittura "naturale": più, meno, per, diviso, x², radice di…
   function naturalize(raw) {
     let s = " " + String(raw).toLowerCase() + " ";
@@ -167,7 +182,20 @@
       }
       showSolve('<span class="sr-label">' + label + '</span><span class="sr-value">' + value + "</span>", "ok");
     } catch (err) {
-      showSolve("Non sono riuscito a risolverlo così. Controlla la scrittura (usa <code>^</code> per le potenze, <code>*</code> per moltiplicare, <code>=</code> per le equazioni) — oppure apri la spiegazione passo-passo con l'AI qui sotto. 👇", "warn");
+      // Il motore locale non ce l'ha fatta: provo con l'AI (se configurata)
+      showSolve("🤖 Il calcolo diretto non bastava: sto provando con l'AI…", "warn");
+      try {
+        const ans = await solveWithAI({ text: raw });
+        showSolve('<span class="sr-label">Soluzione (AI)</span><span class="sr-value">' + nl2br(ans) + "</span>", "ok");
+      } catch (e) {
+        if (e.message === "nofunc") {
+          showSolve("Non sono riuscito a risolverlo qui. Apri la spiegazione passo-passo con l'AI qui sotto 👇 (oppure attiva l'AI automatica seguendo AI-SETUP).", "warn");
+        } else {
+          showSolve("Non sono riuscito a contattare l'AI (" + (e.message || "errore") + "). Apri la spiegazione passo-passo qui sotto 👇", "warn");
+        }
+        const det = document.querySelector(".ai-fallback");
+        if (det) det.open = true;
+      }
     }
   }
 
@@ -259,9 +287,6 @@
       $("#photo-ai-box").scrollIntoView({ behavior: "smooth", block: "nearest" });
     });
 
-    // "Capisci e risolvi" automatico: manda la foto alla funzione AI (Gemini)
-    const AI_ENDPOINT = "/api/solve-photo";
-
     // Rimpicciolisce la foto prima di inviarla (più veloce e più economico)
     function fileToResizedDataURL(file, max, quality) {
       return new Promise((resolve, reject) => {
@@ -281,7 +306,6 @@
         img.src = url;
       });
     }
-    function nl2br(t) { return escapeHtml(t).replace(/\n/g, "<br>"); }
 
     $("#photo-solve-ai").addEventListener("click", async () => {
       const f = photoInput.files && photoInput.files[0];

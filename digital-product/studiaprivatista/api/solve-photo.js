@@ -24,29 +24,40 @@ module.exports = async (req, res) => {
     let body = req.body;
     if (typeof body === "string") { try { body = JSON.parse(body); } catch { body = {}; } }
     const image = body && body.image;
+    const text = body && body.text ? String(body.text).slice(0, 2000) : "";
     const question = body && body.question ? String(body.question).slice(0, 500) : "";
 
-    if (!image || typeof image !== "string") {
-      res.status(400).json({ error: "Nessuna immagine ricevuta." });
+    if ((!image || typeof image !== "string") && !text) {
+      res.status(400).json({ error: "Nessun esercizio ricevuto (né foto né testo)." });
       return;
     }
 
-    const m = /^data:(.+?);base64,(.*)$/s.exec(image);
-    const mimeType = m ? m[1] : "image/jpeg";
-    const data = m ? m[2] : image;
-
-    // Risposta BREVE e con i NUMERI, non un tema discorsivo.
-    const prompt =
-      "Sei un tutor di matematica per il diploma da privatista. " +
-      "Nell'immagine c'è un esercizio (anche scritto a mano). " +
+    // Formato comune: risposta BREVE e con i NUMERI, non un tema discorsivo.
+    const FORMAT =
       "Rispondi in modo BREVE e con i NUMERI, NON con un tema discorsivo. " +
       "Prima leggi bene, poi ricontrolla i conti. Usa ESATTAMENTE questo formato, in italiano:\n" +
-      "📝 Esercizio: (trascrivi l'esercizio com'è, con numeri e simboli)\n" +
+      "📝 Esercizio: (riscrivi l'esercizio com'è, con numeri e simboli)\n" +
       "🧮 Svolgimento: (i passaggi essenziali, uno per riga, con numeri/equazioni — niente frasi lunghe)\n" +
       "✅ Risposta: (solo il risultato finale, in numeri)\n" +
-      "Vai dritto ai calcoli. Se ci sono più soluzioni, elencale tutte (es. x = 2; x = 3). " +
-      "Se l'immagine non è leggibile, scrivi solo: \"Foto non leggibile: rifalla più nitida e dritta.\"\n" +
-      (question ? "Nota dello studente: " + question + "\n" : "");
+      "Vai dritto ai calcoli. Se ci sono più soluzioni, elencale tutte (es. x = 2; x = 3).";
+
+    let parts;
+    if (image && typeof image === "string") {
+      const m = /^data:(.+?);base64,(.*)$/s.exec(image);
+      const mimeType = m ? m[1] : "image/jpeg";
+      const data = m ? m[2] : image;
+      const prompt =
+        "Sei un tutor di matematica per il diploma da privatista. Nell'immagine c'è un esercizio (anche scritto a mano). " +
+        FORMAT + "\nSe l'immagine non è leggibile, scrivi solo: \"Foto non leggibile: rifalla più nitida e dritta.\"\n" +
+        (question ? "Nota dello studente: " + question + "\n" : "");
+      parts = [{ text: prompt }, { inline_data: { mime_type: mimeType, data: data } }];
+    } else {
+      const prompt =
+        "Sei un tutor di matematica per il diploma da privatista. Risolvi questo esercizio. " +
+        FORMAT + "\nEsercizio: " + text + "\n" +
+        (question ? "Nota dello studente: " + question + "\n" : "");
+      parts = [{ text: prompt }];
+    }
 
     const url =
       "https://generativelanguage.googleapis.com/v1beta/models/" +
@@ -56,8 +67,8 @@ module.exports = async (req, res) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: mimeType, data: data } }] }],
-        generationConfig: { temperature: 0.1, maxOutputTokens: 800 },
+        contents: [{ parts: parts }],
+        generationConfig: { temperature: 0.1, maxOutputTokens: 2048 },
       }),
     });
 
@@ -68,9 +79,9 @@ module.exports = async (req, res) => {
       return;
     }
 
-    const parts = j && j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts;
-    const text = parts ? parts.map((p) => p.text || "").join("").trim() : "";
-    res.status(200).json({ text: text || "Non sono riuscito a leggere la foto. Riprova con una foto più nitida." });
+    const outParts = j && j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts;
+    const outText = outParts ? outParts.map((p) => p.text || "").join("").trim() : "";
+    res.status(200).json({ text: outText || "Non sono riuscito a risolverlo. Riprova con una foto più nitida o riscrivi l'esercizio." });
   } catch (e) {
     res.status(500).json({ error: "Errore interno: " + (e && e.message ? e.message : String(e)) });
   }
