@@ -7,11 +7,6 @@
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 
-  /* ---- CONFIG: link di acquisto (sostituisci con il tuo URL Gumroad) ---- */
-  const GUMROAD_URL = "https://gumroad.com/"; // TODO: metti qui il link del prodotto
-  const buy = $("#buy-link");
-  if (buy) buy.href = GUMROAD_URL;
-
   /* =========================================================
      TABS
      ========================================================= */

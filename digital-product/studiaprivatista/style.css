@@ -257,6 +257,12 @@ input:focus, select:focus, textarea:focus, .search:focus { outline: none; border
 .price .old { color: var(--muted); text-decoration: line-through; margin-right: 10px; font-size: 20px; }
 .price .now { color: var(--accent); font-size: 40px; font-weight: 800; }
 .kit-buy .cta { margin: 14px 0 8px; }
+.free-badge {
+  display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+  width: 96px; height: 96px; margin: 0 auto 6px; border-radius: 999px;
+  background: var(--accent); color: #04130d; font-weight: 800; font-size: 22px; line-height: 1;
+}
+.free-badge span { font-size: 14px; letter-spacing: 1px; margin-top: 3px; }
 
 /* ===== FAQ ===== */
 .faq { border-bottom: 1px solid var(--line); padding: 14px 0; }
@@ -265,6 +271,38 @@ input:focus, select:focus, textarea:focus, .search:focus { outline: none; border
 .faq summary::before { content: "＋ "; color: var(--accent); font-weight: 800; }
 .faq[open] summary::before { content: "－ "; }
 .faq p { color: var(--muted); padding-top: 10px; font-size: 15px; }
+
+/* ===== PAGINA MATERIALI ===== */
+.doc-nav { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 28px; }
+.doc-nav a {
+  background: var(--bg-2); border: 1px solid var(--line); color: var(--text);
+  padding: 9px 16px; border-radius: 999px; text-decoration: none; font-size: 14px; font-weight: 600;
+}
+.doc-nav a:hover { border-color: var(--accent); }
+.doc { line-height: 1.7; }
+.doc h2 { margin: 8px 0 14px; padding-top: 10px; }
+.doc h3 { font-size: 19px; color: var(--accent-2); margin: 26px 0 8px; }
+.doc h4 { font-size: 16px; margin: 18px 0 6px; }
+.doc p { color: var(--text); margin-bottom: 12px; }
+.doc ul, .doc ol { margin: 0 0 14px 22px; }
+.doc li { margin-bottom: 6px; color: var(--text); }
+.doc blockquote {
+  border-left: 3px solid var(--accent); background: var(--bg-2);
+  padding: 10px 16px; margin: 14px 0; border-radius: 0 8px 8px 0; color: var(--muted);
+}
+.doc code {
+  background: var(--bg-2); border: 1px solid var(--line); border-radius: 6px;
+  padding: 2px 7px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 14px;
+}
+.doc table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 14px; }
+.doc th, .doc td { border: 1px solid var(--line); padding: 8px 12px; text-align: left; }
+.doc th { background: var(--card-2); }
+.doc .warn {
+  background: rgba(255,210,63,.08); border: 1px solid rgba(255,210,63,.25);
+  border-radius: 10px; padding: 14px 16px; color: var(--muted);
+}
+.back-link { display: inline-block; margin-bottom: 8px; color: var(--accent); text-decoration: none; font-weight: 600; }
+.back-link:hover { text-decoration: underline; }
 
 /* ===== FOOTER ===== */
 .footer { border-top: 1px solid var(--line); padding: 36px 0; margin-top: 30px; text-align: center; }
