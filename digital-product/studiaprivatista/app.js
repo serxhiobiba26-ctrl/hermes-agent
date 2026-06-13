@@ -25,6 +25,38 @@
   const qInput = $("#q-input");
   const solveResult = $("#solve-result");
 
+  // Carica uno script esterno su richiesta (fallback motore di calcolo + OCR)
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      const sc = document.createElement("script");
+      sc.src = src;
+      sc.onload = resolve;
+      sc.onerror = () => reject(new Error("script: " + src));
+      document.head.appendChild(sc);
+    });
+  }
+
+  // Assicura che nerdamer sia pronto: attende i file locali, poi ripiega su CDN
+  let nerdamerReady = null;
+  function ensureNerdamer() {
+    if (typeof nerdamer !== "undefined") return Promise.resolve(true);
+    if (nerdamerReady) return nerdamerReady;
+    nerdamerReady = new Promise((resolve) => {
+      let waited = 0;
+      const iv = setInterval(() => {
+        if (typeof nerdamer !== "undefined") { clearInterval(iv); resolve(true); return; }
+        waited += 200;
+        if (waited >= 2500) {
+          clearInterval(iv);
+          loadScript("https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/all.min.js")
+            .then(() => resolve(typeof nerdamer !== "undefined"))
+            .catch(() => resolve(false));
+        }
+      }, 200);
+    });
+    return nerdamerReady;
+  }
+
   // Capisce anche la scrittura "naturale": più, meno, per, diviso, x², radice di…
   function naturalize(raw) {
     let s = " " + String(raw).toLowerCase() + " ";
@@ -89,12 +121,13 @@
     solveResult.classList.remove("hidden");
   }
 
-  function runSolve() {
+  async function runSolve() {
     const raw = qInput.value.trim();
     if (!raw) { showSolve("✏️ Scrivi prima un'operazione o un'equazione qui sopra.", "warn"); return; }
     if (typeof nerdamer === "undefined") {
-      showSolve("⚠️ Il motore di calcolo si sta ancora caricando: riprova tra un secondo.", "warn");
-      return;
+      showSolve("⏳ Sto caricando il motore di calcolo…", "warn");
+      const ok = await ensureNerdamer();
+      if (!ok) { showSolve("⚠️ Non riesco a caricare il motore di calcolo. Controlla la connessione e ricarica la pagina (Ctrl/Cmd+R).", "warn"); return; }
     }
     let op = $("#q-op").value;
     const s = normalizeMath(naturalize(raw));
@@ -186,16 +219,6 @@
      ========================================================= */
   const photoInput = $("#photo-input");
   let photoURL = null;
-
-  function loadScript(src) {
-    return new Promise((res, rej) => {
-      const sc = document.createElement("script");
-      sc.src = src;
-      sc.onload = res;
-      sc.onerror = () => rej(new Error("script"));
-      document.head.appendChild(sc);
-    });
-  }
   let tessPromise = null;
   function loadTesseract() {
     if (typeof Tesseract !== "undefined") return Promise.resolve();
