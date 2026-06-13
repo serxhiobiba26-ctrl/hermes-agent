@@ -21,7 +21,7 @@
     <div class="container">
       <p class="eyebrow">Per chi prende il diploma di maturità da privatista</p>
       <h1>Studia da privatista.<br /><span>Col metodo giusto, gratis.</span></h1>
-      <p class="sub">Niente scuole online da migliaia di euro. Qui hai una <strong>suite di studio gratuita</strong>: risolvi gli esercizi con l'AI, memorizzi con le flashcard a ripetizione dilazionata e tieni a portata di mano tutte le formule. Tutto nel browser, senza account.</p>
+      <p class="sub">Niente scuole online da migliaia di euro. Qui hai una <strong>suite di studio gratuita</strong>: risolvi i problemi di matematica in un secondo, memorizzi con le flashcard a ripetizione dilazionata e tieni a portata di mano tutte le formule. Tutto nel browser, senza account.</p>
       <div class="hero-cta">
         <a class="cta" href="#suite">Apri la suite gratis ↓</a>
         <a class="cta ghost" href="#esame">Come funziona l'esame</a>
@@ -47,53 +47,72 @@
 
       <!-- TAB 1: RISOLVI -->
       <div class="panel active" id="panel-risolvi">
-        <p class="panel-intro">Scrivi un calcolo per la risposta immediata, oppure un esercizio/domanda per generare il <strong>prompt perfetto</strong> da incollare in ChatGPT o Claude (gratis).</p>
+        <p class="panel-intro">Scrivi un'operazione, un'espressione o un'equazione: <strong>te la risolvo io</strong>, subito, qui nel sito. Niente da copiare da nessuna parte.</p>
 
-        <label class="block">La tua domanda, esercizio o calcolo
-          <textarea id="q-input" rows="3" placeholder="Es. (12 + 5) * 3 — oppure — Spiegami il teorema di Pitagora con un esempio"></textarea>
+        <label class="block">Scrivi qui il tuo problema di matematica
+          <textarea id="q-input" rows="2" placeholder="Es.  x^2 - 5x + 6 = 0    ·    12*(3+4)    ·    (x+2)^2"></textarea>
         </label>
 
-        <div id="calc-result" class="calc-result hidden"></div>
-
-        <div class="grid">
-          <label>Materia
-            <select id="q-materia">
-              <option value="Matematica">Matematica</option>
-              <option value="Fisica">Fisica</option>
-              <option value="Italiano">Italiano</option>
-              <option value="Storia">Storia</option>
-              <option value="Filosofia">Filosofia</option>
-              <option value="Scienze">Scienze</option>
-              <option value="Inglese">Inglese</option>
-              <option value="Diritto / Economia">Diritto / Economia</option>
-              <option value="Altra materia">Altra materia</option>
+        <div class="op-row">
+          <label class="op-label">Cosa devo fare
+            <select id="q-op">
+              <option value="auto">Auto — capisci tu</option>
+              <option value="solve">Risolvi l'equazione</option>
+              <option value="simplify">Calcola / semplifica</option>
+              <option value="diff">Derivata</option>
+              <option value="integrate">Integrale</option>
+              <option value="factor">Fattorizza</option>
+              <option value="expand">Espandi</option>
             </select>
           </label>
-          <label>Cosa vuoi
-            <select id="q-modo">
-              <option value="risolvi">Risolvi passo-passo</option>
-              <option value="spiega">Spiega in modo semplice</option>
-              <option value="verifica">Verifica la mia soluzione</option>
-              <option value="esercizi">Crea esercizi simili</option>
-              <option value="riassunto">Riassumi l'argomento</option>
-              <option value="interroga">Interrogami su questo argomento</option>
-            </select>
-          </label>
+          <button id="solve-btn" class="cta">Risolvi →</button>
         </div>
 
-        <button id="gen-prompt" class="cta">Genera il prompt →</button>
+        <div id="solve-result" class="solve-result hidden"></div>
 
-        <div id="prompt-out" class="output hidden">
-          <div class="output-head">
-            <span>📋 Prompt pronto — incollalo in ChatGPT/Claude</span>
-            <button class="copy-btn" data-target="prompt-text">Copia</button>
+        <p class="hint">Suggerimenti: usa <code>^</code> per le potenze (x^2), <code>*</code> per moltiplicare, <code>=</code> per le equazioni, <code>sqrt(  )</code> per la radice. La <code>x</code> è la variabile.</p>
+
+        <details class="ai-fallback">
+          <summary>Serve la spiegazione passo-passo, o è un'altra materia (italiano, storia, inglese…)?</summary>
+          <p class="muted small">Per le spiegazioni discorsive e le materie non matematiche ti preparo la domanda giusta da incollare in ChatGPT o Claude (gratis).</p>
+          <div class="grid">
+            <label>Materia
+              <select id="q-materia">
+                <option value="Matematica">Matematica</option>
+                <option value="Fisica">Fisica</option>
+                <option value="Italiano">Italiano</option>
+                <option value="Storia">Storia</option>
+                <option value="Filosofia">Filosofia</option>
+                <option value="Scienze">Scienze</option>
+                <option value="Inglese">Inglese</option>
+                <option value="Diritto / Economia">Diritto / Economia</option>
+                <option value="Altra materia">Altra materia</option>
+              </select>
+            </label>
+            <label>Cosa vuoi
+              <select id="q-modo">
+                <option value="risolvi">Risolvi passo-passo</option>
+                <option value="spiega">Spiega in modo semplice</option>
+                <option value="verifica">Verifica la mia soluzione</option>
+                <option value="esercizi">Crea esercizi simili</option>
+                <option value="riassunto">Riassumi l'argomento</option>
+                <option value="interroga">Interrogami su questo argomento</option>
+              </select>
+            </label>
           </div>
-          <pre id="prompt-text"></pre>
-          <div class="output-actions">
-            <a id="open-chatgpt" class="link-btn" href="https://chat.openai.com/" target="_blank" rel="noopener">Apri ChatGPT ↗</a>
-            <a id="open-claude" class="link-btn" href="https://claude.ai/" target="_blank" rel="noopener">Apri Claude ↗</a>
+          <button id="gen-prompt" class="cta small">Prepara la domanda per l'AI →</button>
+          <div id="prompt-out" class="output hidden">
+            <div class="output-head">
+              <span>📋 Pronto — incollalo in ChatGPT/Claude</span>
+              <button class="copy-btn" data-target="prompt-text">Copia</button>
+            </div>
+            <pre id="prompt-text"></pre>
+            <div class="output-actions">
+              <a class="link-btn" href="https://chat.openai.com/" target="_blank" rel="noopener">Apri ChatGPT ↗</a>
+              <a class="link-btn" href="https://claude.ai/" target="_blank" rel="noopener">Apri Claude ↗</a>
+            </div>
           </div>
-        </div>
+        </details>
       </div>
 
       <!-- TAB 2: MEMORIZZA -->
@@ -213,6 +232,10 @@
     </div>
   </footer>
 
+  <script src="nerdamer.core.js"></script>
+  <script src="Algebra.js"></script>
+  <script src="Calculus.js"></script>
+  <script src="Solve.js"></script>
   <script src="data.js"></script>
   <script src="app.js"></script>
 </body>

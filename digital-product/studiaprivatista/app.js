@@ -20,96 +20,105 @@
   });
 
   /* =========================================================
-     1) RISOLVI — calcolatrice sicura + generatore di prompt
+     1) RISOLVI — risolutore matematico (nerdamer) + AI per le spiegazioni
      ========================================================= */
-
-  // Valutatore aritmetico sicuro (shunting-yard, niente eval)
-  function safeCalc(raw) {
-    let s = String(raw).trim().replace(/,/g, ".").replace(/\s+/g, "");
-    if (!s) return null;
-    // solo cifre, operatori e parentesi: altrimenti non è un calcolo
-    if (!/^[0-9.+\-*/^()]+$/.test(s)) return null;
-
-    const tokens = s.match(/(\d+(\.\d+)?|[+\-*/^()])/g);
-    if (!tokens || tokens.join("") !== s) return null;
-
-    const prec = { "+": 1, "-": 1, "*": 2, "/": 2, "^": 3 };
-    const right = { "^": true };
-    const out = [], ops = [];
-    let prev = null;
-
-    for (let t of tokens) {
-      if (/^\d/.test(t)) {
-        out.push(parseFloat(t));
-      } else if (t === "(") {
-        ops.push(t);
-      } else if (t === ")") {
-        while (ops.length && ops[ops.length - 1] !== "(") out.push(ops.pop());
-        if (!ops.length) return null; // parentesi sbilanciate
-        ops.pop();
-      } else {
-        // gestione meno/più unario → 0 davanti
-        if ((t === "-" || t === "+") && (prev === null || prev === "(" || prec[prev])) {
-          out.push(0);
-        }
-        while (
-          ops.length &&
-          prec[ops[ops.length - 1]] &&
-          (right[t] ? prec[ops[ops.length - 1]] > prec[t] : prec[ops[ops.length - 1]] >= prec[t])
-        ) {
-          out.push(ops.pop());
-        }
-        ops.push(t);
-      }
-      prev = t;
-    }
-    while (ops.length) {
-      const op = ops.pop();
-      if (op === "(") return null;
-      out.push(op);
-    }
-
-    const st = [];
-    for (const tok of out) {
-      if (typeof tok === "number") {
-        st.push(tok);
-      } else {
-        const b = st.pop(), a = st.pop();
-        if (a === undefined || b === undefined) return null;
-        let r;
-        if (tok === "+") r = a + b;
-        else if (tok === "-") r = a - b;
-        else if (tok === "*") r = a * b;
-        else if (tok === "/") r = b === 0 ? null : a / b;
-        else if (tok === "^") r = Math.pow(a, b);
-        if (r === null || !isFinite(r)) return null;
-        st.push(r);
-      }
-    }
-    if (st.length !== 1) return null;
-    return st[0];
-  }
-
-  function fmtNum(n) {
-    const rounded = Math.round(n * 1e8) / 1e8;
-    return rounded.toLocaleString("it-IT", { maximumFractionDigits: 8 });
-  }
-
   const qInput = $("#q-input");
-  const calcBox = $("#calc-result");
+  const solveResult = $("#solve-result");
 
-  function updateCalc() {
-    const res = safeCalc(qInput.value);
-    if (res === null) {
-      calcBox.classList.add("hidden");
+  // Normalizza l'input per il motore di calcolo
+  function normalizeMath(raw) {
+    let s = String(raw).trim()
+      .replace(/,/g, ".")            // virgola decimale → punto
+      .replace(/[×·∙]/g, "*")
+      .replace(/[÷:]/g, "/")
+      .replace(/[–—−]/g, "-")
+      .replace(/\s+/g, "");
+    // moltiplicazione implicita: 2x → 2*x, 3(x+1) → 3*(x+1), )( → )*(, )2 → )*2
+    s = s.replace(/(\d)([a-zA-Z(])/g, "$1*$2");
+    s = s.replace(/(\))([a-zA-Z0-9(])/g, "$1*$2");
+    return s;
+  }
+
+  // Indovina la variabile (default x)
+  function guessVar(s) {
+    const cleaned = s.replace(/sqrt|diff|integrate|simplify|expand|factor|abs|sin|cos|tan|log|ln|pi/gi, "");
+    const m = cleaned.match(/[a-z]/i);
+    return m ? m[0].toLowerCase() : "x";
+  }
+
+  // Abbellisce l'output: * → ·, ^n → esponente, sqrt → √
+  function pretty(t) {
+    return String(t)
+      .replace(/\*/g, "·")
+      .replace(/\^\(([^)]+)\)/g, "<sup>$1</sup>")
+      .replace(/\^(-?\d+(\.\d+)?)/g, "<sup>$1</sup>")
+      .replace(/sqrt/g, "√");
+  }
+  function trimNum(d) {
+    if (!d || d.indexOf(".") === -1) return d;
+    return d.replace(/0+$/, "").replace(/\.$/, "");
+  }
+
+  function showSolve(html, kind) {
+    solveResult.className = "solve-result" + (kind ? " " + kind : "");
+    solveResult.innerHTML = html;
+    solveResult.classList.remove("hidden");
+  }
+
+  function runSolve() {
+    const raw = qInput.value.trim();
+    if (!raw) { showSolve("✏️ Scrivi prima un'operazione o un'equazione qui sopra.", "warn"); return; }
+    if (typeof nerdamer === "undefined") {
+      showSolve("⚠️ Il motore di calcolo si sta ancora caricando: riprova tra un secondo.", "warn");
       return;
     }
-    calcBox.innerHTML = "Risultato: <b>" + fmtNum(res) + "</b>";
-    calcBox.classList.remove("hidden");
-  }
-  qInput.addEventListener("input", updateCalc);
+    let op = $("#q-op").value;
+    const s = normalizeMath(raw);
+    const v = guessVar(s);
+    if (op === "auto") op = s.includes("=") ? "solve" : "simplify";
 
-  // Generatore di prompt
+    try {
+      let label, value;
+      if (op === "solve") {
+        const arr = nerdamer.solve(s, v).toString().replace(/^\[|\]$/g, "");
+        const parts = arr.length ? arr.split(",") : [];
+        if (!parts.length) { showSolve("Non ho trovato soluzioni per questa equazione. Controlla la scrittura.", "warn"); return; }
+        label = parts.length > 1 ? "Soluzioni" : "Soluzione";
+        value = parts.map((p) => `${v} = <b>${pretty(p)}</b>`).join("<br>");
+      } else if (op === "diff") {
+        label = "Derivata";
+        value = "<b>" + pretty(nerdamer("diff(" + s + "," + v + ")").toString()) + "</b>";
+      } else if (op === "integrate") {
+        label = "Integrale";
+        value = "<b>" + pretty(nerdamer("integrate(" + s + "," + v + ")").toString()) + " + C</b>";
+      } else if (op === "factor") {
+        label = "Fattorizzazione";
+        value = "<b>" + pretty(nerdamer.factor(s).toString()) + "</b>";
+      } else if (op === "expand") {
+        label = "Sviluppo";
+        value = "<b>" + pretty(nerdamer("expand(" + s + ")").toString()) + "</b>";
+      } else { // simplify / calcola
+        let numeric = "";
+        try {
+          const ev = nerdamer(s).evaluate().toDecimal(10);
+          if (ev !== undefined && /^-?\d/.test(ev) && !/[a-z]/i.test(ev)) numeric = trimNum(ev);
+        } catch (e) {}
+        const simplified = pretty(nerdamer("simplify(" + s + ")").toString());
+        label = "Risultato";
+        value = "<b>" + (numeric || simplified) + "</b>";
+      }
+      showSolve('<span class="sr-label">' + label + '</span><span class="sr-value">' + value + "</span>", "ok");
+    } catch (err) {
+      showSolve("Non sono riuscito a risolverlo così. Controlla la scrittura (usa <code>^</code> per le potenze, <code>*</code> per moltiplicare, <code>=</code> per le equazioni) — oppure apri la spiegazione passo-passo con l'AI qui sotto. 👇", "warn");
+    }
+  }
+
+  $("#solve-btn").addEventListener("click", runSolve);
+  qInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); runSolve(); }
+  });
+
+  // Generatore di prompt (fallback AI per spiegazioni e materie non matematiche)
   const MODI = {
     risolvi: (m, q) => `Sei un tutor di ${m} paziente e chiaro. Risolvi questo esercizio spiegando OGNI passaggio come faresti con uno studente che studia da privatista per il diploma. Alla fine scrivi la risposta finale evidenziata e un breve "perché funziona".\n\nEsercizio:\n${q}`,
     spiega: (m, q) => `Spiegami in modo semplicissimo, come se avessi 14 anni, questo argomento di ${m}. Usa un esempio concreto della vita quotidiana e una piccola analogia. Evita termini complicati; se ne usi uno, spiegalo subito.\n\nArgomento:\n${q}`,
