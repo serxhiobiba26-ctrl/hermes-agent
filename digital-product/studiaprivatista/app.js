@@ -236,6 +236,63 @@
       $("#photo-ai-box").scrollIntoView({ behavior: "smooth", block: "nearest" });
     });
 
+    // "Capisci e risolvi" automatico: manda la foto alla funzione AI (Gemini)
+    const AI_ENDPOINT = "/api/solve-photo";
+
+    // Rimpicciolisce la foto prima di inviarla (più veloce e più economico)
+    function fileToResizedDataURL(file, max, quality) {
+      return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+          let w = img.naturalWidth, h = img.naturalHeight;
+          const big = Math.max(w, h);
+          if (big > max) { const s = max / big; w = Math.round(w * s); h = Math.round(h * s); }
+          const c = document.createElement("canvas");
+          c.width = w; c.height = h;
+          c.getContext("2d").drawImage(img, 0, 0, w, h);
+          URL.revokeObjectURL(url);
+          try { resolve(c.toDataURL("image/jpeg", quality)); } catch (e) { reject(e); }
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("immagine non valida")); };
+        img.src = url;
+      });
+    }
+    function nl2br(t) { return escapeHtml(t).replace(/\n/g, "<br>"); }
+
+    $("#photo-solve-ai").addEventListener("click", async () => {
+      const f = photoInput.files && photoInput.files[0];
+      if (!f) return;
+      const status = $("#photo-status");
+      const btn = $("#photo-solve-ai");
+      btn.disabled = true;
+      status.textContent = "🤖 Sto guardando la foto e risolvendo… (qualche secondo)";
+      try {
+        const dataURL = await fileToResizedDataURL(f, 1280, 0.85);
+        const resp = await fetch(AI_ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image: dataURL, question: qInput.value.trim() || undefined }),
+        });
+        if (resp.status === 404 || resp.status === 405) throw new Error("nofunc");
+        const j = await resp.json().catch(() => ({}));
+        if (!resp.ok) throw new Error(j.error || "Errore dall'AI");
+        showSolve('<span class="sr-label">Soluzione dalla foto (AI)</span><span class="sr-value">' + nl2br(j.text || "") + "</span>", "ok");
+        solveResult.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        status.textContent = "";
+      } catch (e) {
+        if (e.message === "nofunc") {
+          status.textContent = "L'AI automatica non è ancora attivata su questo sito. Per ora uso il metodo manuale qui sotto 👇";
+          $("#photo-ai").click();
+        } else {
+          status.textContent = "Non sono riuscito a contattare l'AI (" + (e.message || "errore") + "). Riprova, oppure usa il metodo manuale.";
+          $("#photo-ai").click();
+        }
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
     // OCR sperimentale: legge il testo dalla foto e lo mette nel riquadro
     $("#photo-ocr").addEventListener("click", async () => {
       const f = photoInput.files && photoInput.files[0];
