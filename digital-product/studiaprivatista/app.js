@@ -72,6 +72,41 @@
     return j.text || "";
   }
 
+  // Capisce se è un "problema a parole" (va all'AI) o matematica pulita (motore locale)
+  const STOP_WORDS = new Set(
+    ("il lo la gli le un uno una del dello della dei degli delle al allo alla ai agli alle " +
+      "con per tra fra che chi cui come dove quando piu più meno per diviso fratto volte moltiplicato " +
+      "radice quadrata quadrato cubo elevato uguale quanto quanta vale calcola calcolare risolvi risolvere " +
+      "trova determina valore soluzione soluzioni equazione espressione risultato dello sono").split(/\s+/)
+  );
+  const MATH_FUNCS = /^(sqrt|sin|cos|tan|cot|log|ln|exp|abs|diff|integrate|simplify|expand|factor|pi)$/i;
+  function looksLikeWordProblem(raw) {
+    const words = (raw.toLowerCase().match(/[a-zàèéìòùáíóú]{3,}/g) || []);
+    let wordy = 0;
+    for (const w of words) {
+      if (STOP_WORDS.has(w) || MATH_FUNCS.test(w)) continue;
+      wordy++;
+    }
+    return wordy >= 1;
+  }
+
+  async function solveViaAI(raw) {
+    showSolve("🤖 Sto risolvendo con l'AI…", "warn");
+    try {
+      const ans = await solveWithAI({ text: raw });
+      showSolve('<span class="sr-label">Soluzione (AI)</span><span class="sr-value">' + nl2br(ans) + "</span>", "ok");
+      solveResult.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    } catch (e) {
+      if (e.message === "nofunc") {
+        showSolve("Per i problemi a parole serve l'AI: completa il collegamento di Gemini su Vercel (vedi AI-SETUP), oppure apri la spiegazione qui sotto 👇", "warn");
+      } else {
+        showSolve("Non sono riuscito a contattare l'AI (" + (e.message || "errore") + "). Apri la spiegazione qui sotto 👇", "warn");
+      }
+      const det = document.querySelector(".ai-fallback");
+      if (det) det.open = true;
+    }
+  }
+
   // Capisce anche la scrittura "naturale": più, meno, per, diviso, x², radice di…
   function naturalize(raw) {
     let s = " " + String(raw).toLowerCase() + " ";
@@ -138,7 +173,9 @@
 
   async function runSolve() {
     const raw = qInput.value.trim();
-    if (!raw) { showSolve("✏️ Scrivi prima un'operazione o un'equazione qui sopra.", "warn"); return; }
+    if (!raw) { showSolve("✏️ Scrivi prima un'operazione, un'equazione o un problema qui sopra.", "warn"); return; }
+    // Problema/equazione a parole → direttamente all'AI (Gemini)
+    if (looksLikeWordProblem(raw)) { await solveViaAI(raw); return; }
     if (typeof nerdamer === "undefined") {
       showSolve("⏳ Sto caricando il motore di calcolo…", "warn");
       const ok = await ensureNerdamer();
@@ -182,20 +219,8 @@
       }
       showSolve('<span class="sr-label">' + label + '</span><span class="sr-value">' + value + "</span>", "ok");
     } catch (err) {
-      // Il motore locale non ce l'ha fatta: provo con l'AI (se configurata)
-      showSolve("🤖 Il calcolo diretto non bastava: sto provando con l'AI…", "warn");
-      try {
-        const ans = await solveWithAI({ text: raw });
-        showSolve('<span class="sr-label">Soluzione (AI)</span><span class="sr-value">' + nl2br(ans) + "</span>", "ok");
-      } catch (e) {
-        if (e.message === "nofunc") {
-          showSolve("Non sono riuscito a risolverlo qui. Apri la spiegazione passo-passo con l'AI qui sotto 👇 (oppure attiva l'AI automatica seguendo AI-SETUP).", "warn");
-        } else {
-          showSolve("Non sono riuscito a contattare l'AI (" + (e.message || "errore") + "). Apri la spiegazione passo-passo qui sotto 👇", "warn");
-        }
-        const det = document.querySelector(".ai-fallback");
-        if (det) det.open = true;
-      }
+      // Il motore locale non ce l'ha fatta: passo all'AI
+      await solveViaAI(raw);
     }
   }
 
