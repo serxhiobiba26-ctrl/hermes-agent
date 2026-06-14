@@ -365,8 +365,9 @@
       }
     });
 
-    // OCR sperimentale: legge il testo dalla foto e lo mette nel riquadro
-    $("#photo-ocr").addEventListener("click", async () => {
+    // OCR sperimentale (opzionale): attivo solo se il pulsante esiste ancora
+    const _ocrBtn = $("#photo-ocr");
+    if (_ocrBtn) _ocrBtn.addEventListener("click", async () => {
       const f = photoInput.files && photoInput.files[0];
       if (!f) return;
       const status = $("#photo-status");
