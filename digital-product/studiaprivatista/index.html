@@ -43,6 +43,7 @@
         <button class="tab active" data-tab="risolvi" role="tab">🔍 Risolvi</button>
         <button class="tab" data-tab="memorizza" role="tab">🧠 Memorizza</button>
         <button class="tab" data-tab="formulario" role="tab">📐 Formulario</button>
+        <button class="tab" data-tab="esercizi" role="tab">✏️ Esercizi</button>
         <button class="tab" data-tab="zaino" role="tab">🎒 Zaino</button>
       </div>
 
@@ -200,6 +201,43 @@
         <p class="panel-intro">Tutte le formule e regole che servono, sempre a portata di mano. Cerca per parola chiave.</p>
         <input id="formula-search" class="search" type="search" placeholder="🔎 Cerca una formula… (es. area, velocità, present perfect)" />
         <div id="formula-list" class="formula-list"></div>
+      </div>
+
+      <!-- TAB: ESERCIZI -->
+      <div class="panel" id="panel-esercizi">
+        <p class="panel-intro">Allenati: il sito ti <strong>crea un esercizio</strong>, tu provi a risolverlo e quando vuoi vedi la <strong>soluzione spiegata passo-passo</strong>. Funziona offline, senza AI.</p>
+        <div class="grid">
+          <label>Tipo di esercizio
+            <select id="ex-type">
+              <option value="lin">Equazione di 1° grado</option>
+              <option value="quad">Equazione di 2° grado</option>
+              <option value="calc">Espressione (calcolo)</option>
+              <option value="frac">Frazioni</option>
+              <option value="perc">Percentuali</option>
+            </select>
+          </label>
+          <label>Difficoltà
+            <select id="ex-diff">
+              <option value="easy">Facile</option>
+              <option value="med">Medio</option>
+            </select>
+          </label>
+        </div>
+        <button id="ex-gen" class="cta">🎲 Genera esercizio</button>
+
+        <div id="ex-area" class="ex-area hidden">
+          <div id="ex-text" class="ex-text"></div>
+          <label class="block">La tua risposta
+            <input id="ex-answer" type="text" placeholder="Es. x = 5  ·  oppure il numero/risultato" />
+          </label>
+          <div class="op-row">
+            <button id="ex-check" class="cta small" type="button">Controlla</button>
+            <button id="ex-show" class="cta small ghost" type="button">Mostra soluzione</button>
+            <button id="ex-new" class="link-btn" type="button">↻ Nuovo esercizio</button>
+          </div>
+          <div id="ex-feedback" class="solve-result hidden"></div>
+          <div id="ex-solution" class="ex-solution hidden"></div>
+        </div>
       </div>
 
       <!-- TAB 4: ZAINO -->

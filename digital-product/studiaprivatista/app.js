@@ -671,6 +671,148 @@
     renderBag();
   }
 
+  /* =========================================================
+     5) ESERCIZI — crea, prova, mostra la soluzione (offline)
+     ========================================================= */
+  if ($("#ex-gen")) {
+    let currentEx = null;
+
+    const rnd = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    const rndNonZero = (min, max) => { let v = 0; while (v === 0) v = rnd(min, max); return v; };
+    const fmtSigned = (n) => (n >= 0 ? "+ " + n : "- " + -n);
+    function termSigned(coef, v) {
+      if (coef === 0) return "";
+      const s = coef > 0 ? " + " : " - ";
+      const m = Math.abs(coef);
+      return s + (v ? (m === 1 ? "" : m) + v : "" + m);
+    }
+    function numsIn(s) {
+      const m = String(s).replace(/,/g, ".").match(/-?\d+(?:\.\d+)?/g);
+      return m ? m.map(Number) : [];
+    }
+    const approxEq = (a, b) => Math.abs(a - b) < 0.01;
+
+    function genLin(diff) {
+      const a = rnd(2, diff === "med" ? 12 : 9);
+      const x = rndNonZero(-9, diff === "med" ? 12 : 9);
+      const b = rndNonZero(-9, 9);
+      const c = a * x + b;
+      return {
+        display: `${a}x ${fmtSigned(b)} = ${c}`, mode: "roots", expected: [x], answerText: `x = ${x}`,
+        steps: [`${a}x = ${c} ${fmtSigned(-b)}`, `${a}x = ${c - b}`, `x = ${c - b} / ${a}`, `x = ${x}`],
+      };
+    }
+    function genQuad(diff) {
+      const R = diff === "med" ? 8 : 6;
+      const r1 = rnd(-R, R), r2 = rnd(-R, R);
+      const p = -(r1 + r2), q = r1 * r2;
+      const disp = "x²" + termSigned(p, "x") + termSigned(q, "") + " = 0";
+      const roots = Array.from(new Set([r1, r2]));
+      const ansText = roots.map((r) => "x = " + r).join("   ;   ");
+      return {
+        display: disp, mode: "roots", expected: roots, answerText: ansText,
+        steps: [
+          `Cerco due numeri con prodotto ${q} e somma ${r1 + r2}: sono ${r1} e ${r2}.`,
+          `(x ${fmtSigned(-r1)})(x ${fmtSigned(-r2)}) = 0`,
+          ansText,
+        ],
+      };
+    }
+    function genCalc(diff) {
+      const ops = ["+", "-", "*"];
+      const n = () => rnd(2, diff === "med" ? 20 : 12);
+      const o = () => ops[rnd(0, 2)];
+      const parts = [n(), o(), n()];
+      if (diff === "med") { parts.push(o(), n()); }
+      const expr = parts.join("");
+      let val = "?";
+      try { val = nerdamer(expr).evaluate().toString(); } catch (e) {}
+      return {
+        display: expr.replace(/\*/g, " · ") + " = ?", mode: "value", expected: Number(val),
+        answerText: "= " + val, steps: ["Ordine delle operazioni: prima · poi + e −.", expr.replace(/\*/g, " · ") + " = " + val],
+      };
+    }
+    function genFrac() {
+      const b = rnd(2, 6), d = rnd(2, 6), a = rnd(1, b), c = rnd(1, d);
+      const op = Math.random() < 0.5 ? "+" : "-";
+      let ans = "?";
+      try { ans = nerdamer(`${a}/${b}${op}${c}/${d}`).toString(); } catch (e) {}
+      return {
+        display: `${a}/${b} ${op} ${c}/${d} = ?`, mode: "expr", answerExpr: ans, answerText: "= " + ans,
+        steps: ["Riduci allo stesso denominatore, poi somma/sottrai i numeratori.", `${a}/${b} ${op} ${c}/${d} = ${ans}`],
+      };
+    }
+    function genPerc(diff) {
+      const ps = [5, 10, 15, 20, 25, 30, 40, 50, 75];
+      const p = ps[rnd(0, ps.length - 1)];
+      const base = rnd(2, diff === "med" ? 40 : 20) * 10;
+      const val = Math.round(p * base) / 100;
+      return {
+        display: `Quanto è ${p}% di ${base}?`, mode: "value", expected: val, answerText: "= " + val,
+        steps: [`${p}% = ${p}/100 = ${p / 100}`, `${p / 100} × ${base} = ${val}`],
+      };
+    }
+    function genExercise(type, diff) {
+      if (type === "lin") return genLin(diff);
+      if (type === "quad") return genQuad(diff);
+      if (type === "calc") return genCalc(diff);
+      if (type === "frac") return genFrac(diff);
+      return genPerc(diff);
+    }
+
+    function exFeedback(msg, kind) {
+      const el = $("#ex-feedback");
+      el.className = "solve-result " + (kind || "");
+      el.textContent = msg;
+      el.classList.remove("hidden");
+    }
+    function checkAnswer() {
+      if (!currentEx) return;
+      const user = $("#ex-answer").value.trim();
+      if (!user) { exFeedback("✏️ Scrivi la tua risposta.", "warn"); return; }
+      let ok = false;
+      if (currentEx.mode === "roots") {
+        const nums = numsIn(user);
+        ok = nums.length >= currentEx.expected.length && currentEx.expected.every((e) => nums.some((u) => approxEq(u, e)));
+      } else if (currentEx.mode === "value") {
+        const nums = numsIn(user);
+        ok = nums.some((u) => approxEq(u, currentEx.expected));
+        if (!ok) { try { ok = approxEq(Number(nerdamer(normalizeMath(naturalize(user))).evaluate().toString()), currentEx.expected); } catch (e) {} }
+      } else { // expr
+        try {
+          const ue = normalizeMath(naturalize(user));
+          ok = nerdamer("(" + ue + ")-(" + currentEx.answerExpr + ")").evaluate().toString() === "0";
+        } catch (e) { ok = false; }
+      }
+      exFeedback(ok ? "✅ Giusto! Bravo." : "❌ Non ci siamo. Riprova, oppure premi “Mostra soluzione”.", ok ? "ok" : "warn");
+    }
+    function showSolution() {
+      if (!currentEx) return;
+      const el = $("#ex-solution");
+      el.innerHTML =
+        '<span class="sr-label">Soluzione spiegata</span>' +
+        '<div class="ex-steps">' + currentEx.steps.map((s) => escapeHtml(s)).join("<br>") + "</div>" +
+        '<div class="ex-final"><b>' + escapeHtml(currentEx.answerText) + "</b></div>";
+      el.classList.remove("hidden");
+    }
+
+    $("#ex-gen").addEventListener("click", async () => {
+      const type = $("#ex-type").value, diff = $("#ex-diff").value;
+      if (type === "calc" || type === "frac") await ensureNerdamer();
+      currentEx = genExercise(type, diff);
+      $("#ex-text").textContent = currentEx.display;
+      $("#ex-answer").value = "";
+      $("#ex-feedback").classList.add("hidden");
+      $("#ex-solution").classList.add("hidden");
+      $("#ex-area").classList.remove("hidden");
+      $("#ex-answer").focus();
+    });
+    $("#ex-check").addEventListener("click", checkAnswer);
+    $("#ex-show").addEventListener("click", showSolution);
+    $("#ex-new").addEventListener("click", () => $("#ex-gen").click());
+    $("#ex-answer").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); checkAnswer(); } });
+  }
+
   /* ---- init ---- */
   renderDecks();
   renderFormule("");
