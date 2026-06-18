@@ -90,11 +90,14 @@
     return wordy >= 1;
   }
 
-  async function solveViaAI(raw) {
-    showSolve("🤖 Sto risolvendo con l'AI…", "warn");
+  function tutorOn() { const t = $("#tutor-mode"); return !!(t && t.checked); }
+
+  async function solveViaAI(raw, tutor) {
+    showSolve(tutor ? "🎓 Il tutor sta preparando la spiegazione…" : "🤖 Sto risolvendo con l'AI…", "warn");
     try {
-      const ans = await solveWithAI({ text: raw });
-      showSolve('<span class="sr-label">Soluzione (AI)</span><span class="sr-value">' + nl2br(ans) + "</span>", "ok");
+      const ans = await solveWithAI({ text: raw, tutor: !!tutor });
+      const label = tutor ? "Spiegazione del tutor" : "Soluzione (AI)";
+      showSolve('<span class="sr-label">' + label + '</span><span class="sr-value">' + nl2br(ans) + "</span>", "ok");
       solveResult.scrollIntoView({ behavior: "smooth", block: "nearest" });
     } catch (e) {
       if (e.message === "nofunc") {
@@ -174,6 +177,8 @@
   async function runSolve() {
     const raw = qInput.value.trim();
     if (!raw) { showSolve("✏️ Scrivi prima un'operazione, un'equazione o un problema qui sopra.", "warn"); return; }
+    // Modalità tutor: spiegazione passo-passo dall'AI per qualsiasi input
+    if (tutorOn()) { await solveViaAI(raw, true); return; }
     // Problema/equazione a parole → direttamente all'AI (Gemini)
     if (looksLikeWordProblem(raw)) { await solveViaAI(raw); return; }
     if (typeof nerdamer === "undefined") {
@@ -344,7 +349,7 @@
         const resp = await fetch(AI_ENDPOINT, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ image: dataURL, question: qInput.value.trim() || undefined }),
+          body: JSON.stringify({ image: dataURL, question: qInput.value.trim() || undefined, tutor: tutorOn() }),
         });
         if (resp.status === 404 || resp.status === 405) throw new Error("nofunc");
         const j = await resp.json().catch(() => ({}));
@@ -837,6 +842,58 @@
     $("#ex-show").addEventListener("click", showSolution);
     $("#ex-new").addEventListener("click", () => $("#ex-gen").click());
     $("#ex-answer").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); checkAnswer(); } });
+  }
+
+  /* =========================================================
+     6) VERIFICA — preparazione esame (crea quiz + correggi, via AI)
+     ========================================================= */
+  if ($("#vf-gen")) {
+    let quizText = "";
+    const vfStatus = $("#vf-status");
+
+    $("#vf-gen").addEventListener("click", async () => {
+      const materia = $("#vf-materia").value.trim();
+      const argomento = $("#vf-argomento").value.trim();
+      const n = $("#vf-n").value;
+      if (!argomento) { vfStatus.textContent = "✏️ Scrivi l'argomento della verifica."; return; }
+      const btn = $("#vf-gen"); btn.disabled = true;
+      vfStatus.textContent = "📝 Sto preparando la verifica…";
+      try {
+        quizText = await solveWithAI({ task: "quiz", materia, argomento, n });
+        $("#vf-questions").textContent = quizText;
+        $("#vf-answers").value = "";
+        $("#vf-result").classList.add("hidden");
+        $("#vf-area").classList.remove("hidden");
+        vfStatus.textContent = "";
+        $("#vf-area").scrollIntoView({ behavior: "smooth", block: "nearest" });
+      } catch (e) {
+        vfStatus.textContent = e.message === "nofunc"
+          ? "Per la verifica serve l'AI Gemini collegata (vedi AI-SETUP)."
+          : "Errore: " + (e.message || "riprova");
+      } finally { btn.disabled = false; }
+    });
+
+    $("#vf-grade").addEventListener("click", async () => {
+      const risposte = $("#vf-answers").value.trim();
+      if (!risposte) { vfStatus.textContent = "✏️ Scrivi prima le tue risposte."; return; }
+      const btn = $("#vf-grade"); btn.disabled = true;
+      vfStatus.textContent = "🧑‍🏫 Sto correggendo…";
+      try {
+        const txt = await solveWithAI({ task: "grade", materia: $("#vf-materia").value.trim(), domande: quizText, risposte });
+        const el = $("#vf-result");
+        el.className = "solve-result ok";
+        el.innerHTML = '<span class="sr-label">Correzione</span><span class="sr-value">' + nl2br(txt) + "</span>";
+        el.classList.remove("hidden");
+        vfStatus.textContent = "";
+        el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      } catch (e) {
+        vfStatus.textContent = e.message === "nofunc"
+          ? "Per correggere serve l'AI Gemini collegata (vedi AI-SETUP)."
+          : "Errore: " + (e.message || "riprova");
+      } finally { btn.disabled = false; }
+    });
+
+    $("#vf-new").addEventListener("click", () => $("#vf-gen").click());
   }
 
   /* ---- init ---- */

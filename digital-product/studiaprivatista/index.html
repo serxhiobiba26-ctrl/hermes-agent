@@ -44,6 +44,7 @@
         <button class="tab" data-tab="memorizza" role="tab">🧠 Memorizza</button>
         <button class="tab" data-tab="formulario" role="tab">📐 Formulario</button>
         <button class="tab" data-tab="esercizi" role="tab">✏️ Esercizi</button>
+        <button class="tab" data-tab="verifica" role="tab">📝 Verifica</button>
         <button class="tab" data-tab="zaino" role="tab">🎒 Zaino</button>
       </div>
 
@@ -69,6 +70,8 @@
           </label>
           <button id="solve-btn" class="cta">Risolvi →</button>
         </div>
+
+        <label class="tutor-toggle"><input type="checkbox" id="tutor-mode" /> 🎓 Spiegami come un tutor (passo-passo, non solo il risultato)</label>
 
         <div id="solve-result" class="solve-result hidden"></div>
 
@@ -236,6 +239,36 @@
           </div>
           <div id="ex-feedback" class="solve-result hidden"></div>
           <div id="ex-solution" class="ex-solution hidden"></div>
+        </div>
+      </div>
+
+      <!-- TAB: VERIFICA (preparazione esame) -->
+      <div class="panel" id="panel-verifica">
+        <p class="panel-intro">Preparazione esame: scegli materia e argomento, l'AI ti crea una <strong>mini-verifica</strong>. Tu rispondi e lei ti <strong>corregge con voto e consigli</strong>. (Serve l'AI Gemini collegata.)</p>
+        <div class="grid">
+          <label>Materia
+            <input id="vf-materia" type="text" placeholder="Es. Storia, Matematica, Inglese" />
+          </label>
+          <label>Numero di domande
+            <select id="vf-n"><option>3</option><option selected>5</option><option>8</option></select>
+          </label>
+          <label class="full">Argomento
+            <input id="vf-argomento" type="text" placeholder="Es. La Prima guerra mondiale · Le equazioni di 2° grado" />
+          </label>
+        </div>
+        <button id="vf-gen" class="cta" type="button">📝 Crea la verifica</button>
+        <p id="vf-status" class="muted small"></p>
+
+        <div id="vf-area" class="hidden">
+          <div id="vf-questions" class="vf-questions"></div>
+          <label class="block">Le tue risposte (numera: 1) … 2) … 3) …)
+            <textarea id="vf-answers" rows="6" placeholder="1) ...&#10;2) ...&#10;3) ..."></textarea>
+          </label>
+          <div class="op-row">
+            <button id="vf-grade" class="cta small" type="button">Correggi</button>
+            <button id="vf-new" class="link-btn" type="button">↻ Nuova verifica</button>
+          </div>
+          <div id="vf-result" class="solve-result hidden"></div>
         </div>
       </div>
 

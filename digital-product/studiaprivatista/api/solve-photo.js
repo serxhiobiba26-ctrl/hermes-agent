@@ -26,13 +26,12 @@ module.exports = async (req, res) => {
     const image = body && body.image;
     const text = body && body.text ? String(body.text).slice(0, 2000) : "";
     const question = body && body.question ? String(body.question).slice(0, 500) : "";
+    const tutor = !!(body && body.tutor);
+    const task = body && body.task;
+    const materia = body && body.materia ? String(body.materia).slice(0, 80) : "";
+    const argomento = body && body.argomento ? String(body.argomento).slice(0, 200) : "";
 
-    if ((!image || typeof image !== "string") && !text) {
-      res.status(400).json({ error: "Nessun esercizio ricevuto (né foto né testo)." });
-      return;
-    }
-
-    // Formato comune: risposta BREVE e con i NUMERI, non un tema discorsivo.
+    // Formato "risolutore": risposta BREVE e con i NUMERI.
     const FORMAT =
       "Rispondi in modo BREVE e con i NUMERI, NON con un tema discorsivo. " +
       "Prima leggi bene, poi ricontrolla i conti. Usa ESATTAMENTE questo formato, in italiano:\n" +
@@ -40,23 +39,49 @@ module.exports = async (req, res) => {
       "🧮 Svolgimento: (i passaggi essenziali, uno per riga, con numeri/equazioni — niente frasi lunghe)\n" +
       "✅ Risposta: (solo il risultato finale, in numeri)\n" +
       "Vai dritto ai calcoli. Se ci sono più soluzioni, elencale tutte (es. x = 2; x = 3).";
+    // Formato "socratico": guida con domande e passaggi, in italiano.
+    const SOCRATIC =
+      "Comportati come un tutor SOCRATICO, in italiano. Spiega il ragionamento passo per passo, " +
+      "in modo semplice e con esempi, come faresti con uno studente che prende il diploma da privatista. " +
+      "Aiutami a capire il PERCHÉ di ogni passaggio, non darmi solo il numero. " +
+      "Alla fine scrivi comunque una riga \"✅ Risposta:\" con il risultato corretto.";
 
     let parts;
-    if (image && typeof image === "string") {
+    if (task === "quiz") {
+      const n = Math.min(10, Math.max(2, parseInt(body.n, 10) || 5));
+      if (!argomento) { res.status(400).json({ error: "Manca l'argomento della verifica." }); return; }
+      parts = [{ text:
+        `Sei un professore. Prepara una mini-verifica di ${materia || "questa materia"} sull'argomento "${argomento}", ` +
+        `per uno studente che prende il diploma di maturità da privatista. ` +
+        `Scrivi ESATTAMENTE ${n} domande numerate (1., 2., …), chiare e brevi, di difficoltà crescente. ` +
+        `Solo le domande, in italiano, SENZA soluzioni e senza commenti.` }];
+    } else if (task === "grade") {
+      const domande = body && body.domande ? String(body.domande).slice(0, 3000) : "";
+      const risposte = body && body.risposte ? String(body.risposte).slice(0, 4000) : "";
+      if (!domande || !risposte) { res.status(400).json({ error: "Mancano domande o risposte da correggere." }); return; }
+      parts = [{ text:
+        `Sei un professore che corregge una verifica di ${materia || "questa materia"}, in italiano. ` +
+        `Per OGNI domanda: di' se la risposta è giusta o sbagliata, correggi in breve e indica la risposta corretta. ` +
+        `Alla fine scrivi una riga "📊 Voto: X/10" e 2 consigli pratici per migliorare. Sii incoraggiante ma onesto.\n\n` +
+        `DOMANDE:\n${domande}\n\nRISPOSTE DELLO STUDENTE:\n${risposte}` }];
+    } else if (image && typeof image === "string") {
       const m = /^data:(.+?);base64,(.*)$/s.exec(image);
       const mimeType = m ? m[1] : "image/jpeg";
       const data = m ? m[2] : image;
       const prompt =
         "Sei un tutor di matematica per il diploma da privatista. Nell'immagine c'è un esercizio (anche scritto a mano). " +
-        FORMAT + "\nSe l'immagine non è leggibile, scrivi solo: \"Foto non leggibile: rifalla più nitida e dritta.\"\n" +
+        (tutor ? SOCRATIC : FORMAT) + "\nSe l'immagine non è leggibile, scrivi solo: \"Foto non leggibile: rifalla più nitida e dritta.\"\n" +
         (question ? "Nota dello studente: " + question + "\n" : "");
       parts = [{ text: prompt }, { inline_data: { mime_type: mimeType, data: data } }];
-    } else {
+    } else if (text) {
       const prompt =
         "Sei un tutor di matematica per il diploma da privatista. Risolvi questo esercizio. " +
-        FORMAT + "\nEsercizio: " + text + "\n" +
+        (tutor ? SOCRATIC : FORMAT) + "\nEsercizio: " + text + "\n" +
         (question ? "Nota dello studente: " + question + "\n" : "");
       parts = [{ text: prompt }];
+    } else {
+      res.status(400).json({ error: "Nessun esercizio ricevuto (né foto né testo)." });
+      return;
     }
 
     const url =
