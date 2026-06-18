@@ -1,8 +1,6 @@
-*
-!digital-product
-!digital-product/studiaprivatista
-!digital-product/studiaprivatista/index.html
-!digital-product/studiaprivatista/style.css
-!digital-product/studiaprivatista/app.js
-!digital-product/studiaprivatista/data.js
-!vercel.json
+/*
+!/digital-product
+/digital-product/*
+!/digital-product/studiaprivatista
+!/api
+!/vercel.json
