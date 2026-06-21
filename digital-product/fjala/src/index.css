@@ -1,0 +1,308 @@
+/* ===== Token di design ===== */
+:root {
+  --carta: #fbf9f4;
+  --inchiostro: #1c2230;
+  --inchiostro-tenue: #4a5163;
+  --petrolio: #166b66;
+  --ambra: #d98a3d;
+  --filo: #e4decf;
+
+  --raggio: 12px;
+  --ombra: 0 1px 2px rgba(28, 34, 48, 0.04), 0 8px 24px rgba(28, 34, 48, 0.06);
+  --font-display: "Spectral", Georgia, serif;
+  --font-testo: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--carta);
+  color: var(--inchiostro);
+  font-family: var(--font-testo);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+.app {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: clamp(20px, 4vw, 48px) clamp(16px, 4vw, 32px) 56px;
+}
+
+/* ===== Intestazione ===== */
+.intestazione {
+  margin-bottom: clamp(20px, 4vw, 36px);
+}
+
+.marchio {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 26px;
+  letter-spacing: 0.01em;
+  color: var(--inchiostro);
+}
+
+.sottotitolo {
+  margin: 4px 0 0;
+  color: var(--inchiostro-tenue);
+  font-size: 15px;
+}
+
+/* ===== Libro: due pagine affiancate ===== */
+.libro {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 0;
+  align-items: stretch;
+  background: #fff;
+  border: 1px solid var(--filo);
+  border-radius: var(--raggio);
+  box-shadow: var(--ombra);
+  overflow: hidden;
+}
+
+.pagina {
+  display: flex;
+  flex-direction: column;
+  padding: clamp(16px, 3vw, 28px);
+  min-width: 0;
+}
+
+.etichetta-pagina {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--inchiostro-tenue);
+  margin-bottom: 10px;
+  display: block;
+}
+
+.campo-testo {
+  width: 100%;
+  min-height: 240px;
+  flex: 1;
+  resize: vertical;
+  border: 1px solid var(--filo);
+  border-radius: var(--raggio);
+  background: var(--carta);
+  color: var(--inchiostro);
+  font-family: var(--font-testo);
+  font-size: 16px;
+  line-height: 1.6;
+  padding: 14px 16px;
+}
+
+.campo-testo::placeholder {
+  color: var(--inchiostro-tenue);
+  opacity: 0.7;
+}
+
+/* ===== Pulsanti azione ===== */
+.pulsanti {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.pulsante {
+  flex: 1 1 auto;
+  min-width: 110px;
+  border: 1px solid var(--petrolio);
+  background: var(--petrolio);
+  color: #fff;
+  font-family: var(--font-testo);
+  font-weight: 600;
+  font-size: 15px;
+  padding: 11px 16px;
+  border-radius: var(--raggio);
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.05s ease;
+}
+
+.pulsante:hover:not(:disabled) {
+  background: #12544f;
+}
+
+.pulsante:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.pulsante.attivo {
+  background: #12544f;
+}
+
+.pulsante:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.usi-residui {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: var(--inchiostro-tenue);
+}
+
+/* ===== Dorso centrale (elemento-firma) ===== */
+.dorso {
+  position: relative;
+  width: 1px;
+  background: var(--filo);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.indicatore-direzione {
+  position: absolute;
+  white-space: nowrap;
+  font-family: var(--font-testo);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: #fff;
+  background: var(--ambra);
+  border: none;
+  border-radius: 999px;
+  padding: 9px 14px;
+  cursor: pointer;
+  box-shadow: var(--ombra);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.indicatore-direzione:hover {
+  background: #c87a30;
+  transform: scale(1.04);
+}
+
+.indicatore-direzione:active {
+  transform: scale(0.98);
+}
+
+/* ===== Pagina risultato ===== */
+.campo-risultato {
+  flex: 1;
+  min-height: 240px;
+  border: 1px solid var(--filo);
+  border-radius: var(--raggio);
+  background: var(--carta);
+  padding: 14px 16px;
+  overflow: auto;
+}
+
+.testo-risultato {
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.placeholder-risultato {
+  margin: 0;
+  color: var(--inchiostro-tenue);
+  opacity: 0.7;
+  font-style: italic;
+}
+
+.messaggio-errore {
+  margin: 0;
+  color: #9a3412;
+  background: #fdf3ea;
+  border: 1px solid #f2d6bd;
+  border-radius: var(--raggio);
+  padding: 12px 14px;
+}
+
+/* ===== Note ===== */
+.note {
+  margin-top: clamp(20px, 4vw, 32px);
+}
+
+.titolo-note {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 18px;
+  margin: 0 0 14px;
+}
+
+.griglia-note {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.scheda-nota {
+  background: #fff;
+  border: 1px solid var(--filo);
+  border-left: 3px solid var(--ambra);
+  border-radius: var(--raggio);
+  padding: 14px 16px;
+  box-shadow: var(--ombra);
+}
+
+.nota-titolo {
+  font-family: var(--font-testo);
+  font-weight: 600;
+  font-size: 15px;
+  margin: 0 0 6px;
+  color: var(--inchiostro);
+}
+
+.nota-spiegazione {
+  margin: 0;
+  font-size: 14px;
+  color: var(--inchiostro-tenue);
+}
+
+/* ===== Footer ===== */
+.footer {
+  margin-top: clamp(28px, 5vw, 48px);
+  padding-top: 16px;
+  border-top: 1px solid var(--filo);
+  font-size: 13px;
+  color: var(--inchiostro-tenue);
+  text-align: center;
+}
+
+/* ===== Focus visibile da tastiera ===== */
+:focus-visible {
+  outline: 2px solid var(--petrolio);
+  outline-offset: 2px;
+}
+
+.indicatore-direzione:focus-visible {
+  outline-color: var(--ambra);
+}
+
+/* ===== Mobile: pagine impilate ===== */
+@media (max-width: 720px) {
+  .libro {
+    grid-template-columns: 1fr;
+  }
+
+  .dorso {
+    width: auto;
+    height: 1px;
+    margin: 0 clamp(16px, 3vw, 28px);
+  }
+
+  .indicatore-direzione {
+    position: relative;
+  }
+}
+
+/* ===== Rispetto delle preferenze di movimento ===== */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
