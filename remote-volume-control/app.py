@@ -5,16 +5,44 @@ Remote Volume Control - Web App
 PC Host: Windows | Dispositivo remoto: Android (o qualsiasi browser)
 """
 
+import os
 import socket
-from flask import Flask, render_template_string, jsonify
+from functools import wraps
+
+from flask import Flask, Response, render_template_string, jsonify, request
 
 app = Flask(__name__)
 
 # ============================================================
 # CONFIGURAZIONE
 # ============================================================
-STEP_VOLUME = 10  # Percentuale di incremento/decremento
-PORT = 5000
+STEP_VOLUME = int(os.environ.get("STEP_VOLUME", 10))  # Percentuale di incremento/decremento
+PORT = int(os.environ.get("PORT", 5000))
+
+# Password opzionale. Se imposti la variabile d'ambiente VOLUME_PASSWORD,
+# l'app richiede login (HTTP Basic Auth) su TUTTE le route. Fondamentale
+# quando esponi l'app su internet con un tunnel. Se non impostata, nessuna
+# password (comodo sull'uso in wifi locale di casa).
+#   Windows PowerShell:  $env:VOLUME_PASSWORD="lamiapassword"
+#   Windows CMD:         set VOLUME_PASSWORD=lamiapassword
+VOLUME_PASSWORD = os.environ.get("VOLUME_PASSWORD", "").strip()
+
+
+def require_auth(view):
+    """Protegge una route con HTTP Basic Auth se VOLUME_PASSWORD e' impostata."""
+    @wraps(view)
+    def wrapper(*args, **kwargs):
+        if VOLUME_PASSWORD:
+            auth = request.authorization
+            if not auth or auth.password != VOLUME_PASSWORD:
+                return Response(
+                    "Autenticazione richiesta.",
+                    401,
+                    {"WWW-Authenticate": 'Basic realm="Remote Volume Control"'},
+                )
+        return view(*args, **kwargs)
+
+    return wrapper
 
 # ============================================================
 # LOGICA VOLUME - WINDOWS (PC Host)
@@ -442,6 +470,7 @@ HTML_TEMPLATE = """
 
 
 @app.route('/')
+@require_auth
 def index():
     return render_template_string(
         HTML_TEMPLATE,
@@ -453,6 +482,7 @@ def index():
 
 
 @app.route('/api/volume/<action>', methods=['POST'])
+@require_auth
 def api_volume(action):
     if action == 'up':
         new_vol = volume_up()
@@ -470,6 +500,7 @@ def api_volume(action):
 
 
 @app.route('/api/volume', methods=['GET'])
+@require_auth
 def api_get_volume():
     return jsonify({'success': True, 'volume': get_current_volume()})
 
@@ -486,6 +517,10 @@ if __name__ == '__main__':
     print(f"  🖥️  PC Host: {socket.gethostname()} (Windows)")
     print(f"  🌐 IP Locale: {local_ip}")
     print(f"  🔌 Porta: {PORT}")
+    if VOLUME_PASSWORD:
+        print("  🔒 Password: ATTIVA (login richiesto)")
+    else:
+        print("  🔓 Password: NON impostata (ok in wifi locale, NON per un tunnel)")
     print("=" * 62)
     print("  📱 Apri nel browser di Android:")
     print(f"     http://{local_ip}:{PORT}")

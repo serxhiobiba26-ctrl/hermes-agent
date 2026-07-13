@@ -38,10 +38,25 @@ Apri quell'URL dal browser del telefono e usa i pulsanti.
 
 ## Configurazione
 
-Nel file `app.py`:
+Tramite variabili d'ambiente (o modificando i default in `app.py`):
 
 - `STEP_VOLUME` — di quanti punti percentuali sale/scende ogni pressione (default `10`).
 - `PORT` — la porta del server (default `5000`).
+- `VOLUME_PASSWORD` — se impostata, l'app richiede login (HTTP Basic Auth) su
+  tutte le route. **Impostala sempre quando esponi l'app su internet** con un
+  tunnel. In wifi locale è facoltativa. Utente qualsiasi, password quella scelta.
+
+  ```powershell
+  $env:VOLUME_PASSWORD="lamiapassword"   # PowerShell
+  python app.py
+  ```
+
+## Provarlo dal telefono
+
+Vedi **[GUIDA.md](GUIDA.md)** per i due scenari passo-passo:
+
+- **In casa (stesso wifi)** — apri sul telefono l'IP mostrato all'avvio. Gratis.
+- **Fuori casa (dati mobili)** — tunnel `cloudflared`/`ngrok` + password.
 
 ## API
 
